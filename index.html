@@ -172,7 +172,7 @@ tr.click:hover td{background:var(--paper)}
 .stat b{display:block;font-family:var(--f-display);font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
 .stat span{font-size:13px;color:var(--muted)}
 .preview{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
-.pv{display:grid;grid-template-columns:28px 92px 1fr;gap:8px;align-items:baseline;font-size:15px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.pv{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:baseline;font-size:15px;padding:6px 0;border-bottom:1px dashed var(--line)}
 .pv>*{min-width:0;overflow-wrap:anywhere}
 .pv .ans{color:var(--ok);font-weight:700}
 .pv.err{color:var(--bad)}
@@ -353,7 +353,7 @@ function vStudentHome(){
     if(q.open_attempt)btn='<button class="btn primary" data-a="start" data-id="'+q.id+'">Kontynuuj →</button>';
     else if(!q.last)btn='<button class="btn primary" data-a="start" data-id="'+q.id+'">Zacznij →</button>';
     else btn='<button class="btn" data-a="sattempt" data-id="'+q.last.attempt_id+'">Zobacz wynik</button>'+(q.allow_retake?'<button class="btn primary" data-a="start" data-id="'+q.id+'">Napisz ponownie</button>':'');
-    var res=q.last?' · wynik '+q.last.base_score+'/'+q.last.base_total:'';
+    var res=q.last?' · wynik '+pct(q.last.base_score,q.last.base_total)+'%':'';
     out+='<article class="card qcard"><div class="stack" style="gap:4px"><div class="row" style="gap:6px">'+st+'</div><h3>'+esc(q.title)+'</h3><p class="meta">'+q.item_count+' '+pl(q.item_count,'zadanie','zadania','zadań')+(q.extra_count&&h.review.length?' + Twoje powtórki':'')+res+'</p></div><div class="row">'+btn+'</div></article>';
   });out+='</div>';}
   out+='</section>';
@@ -364,7 +364,7 @@ function vStudentHome(){
     out+='</div>';}
   out+='</section>';
   if(h.history.length){out+='<section class="card"><h2>Historia</h2><div class="hist">';
-    h.history.forEach(function(a){var p=pct(a.base_score,a.base_total);out+='<button class="hrow" data-a="sattempt" data-id="'+a.attempt_id+'"><span class="t">'+esc(a.title)+'<br><span class="meta" style="font-weight:400">'+fmtDate(a.finished_at)+'</span></span>'+bar(p,a.base_score+'/'+a.base_total)+'</button>';});
+    h.history.forEach(function(a){var p=pct(a.base_score,a.base_total);out+='<button class="hrow" data-a="sattempt" data-id="'+a.attempt_id+'"><span class="t">'+esc(a.title)+'<br><span class="meta" style="font-weight:400">'+fmtDate(a.finished_at)+'</span></span>'+bar(p)+'</button>';});
     out+='</div></section>';}
   return out+'</main>';
 }
@@ -430,7 +430,7 @@ function practiceCard(a,teacherView){
     if(pr&&pr.finished)return '<section class="card"><div class="row"><h3>Ćwiczenie 2 min po kartkówce</h3><span class="spacer"></span><b>'+pr.score+'/'+pr.total+'</b><button class="btn sm" data-a="tpractice" data-id="'+a.attempt_id+'">Zobacz</button></div></section>';
     return '';
   }
-  if(pr&&pr.finished)return '<section class="card"><div class="row"><div class="stack" style="gap:2px;flex:1;min-width:200px"><h3>⏱ Ćwiczenie 2 min – zrobione</h3><p class="meta">Wynik: '+pr.score+'/'+pr.total+'</p></div><button class="btn" data-a="practice" data-id="'+a.attempt_id+'">Zobacz ćwiczenie</button></div></section>';
+  if(pr&&pr.finished)return '<section class="card"><div class="row"><div class="stack" style="gap:2px;flex:1;min-width:200px"><h3>⏱ Ćwiczenie 2 min – zrobione</h3><p class="meta">Wynik: '+pct(pr.score,pr.total)+'%</p></div><button class="btn" data-a="practice" data-id="'+a.attempt_id+'">Zobacz ćwiczenie</button></div></section>';
   if(!wrong.length)return '';
   return '<section class="card" style="border:2px solid var(--accent)"><div class="stack" style="gap:6px"><h2>⏱ Ćwiczenie na 2 minuty</h2><p class="meta">AI ułoży krótkie zadania tylko z tego, w czym się pomyliłeś:</p><div class="row" style="gap:6px">'+
     wrong.slice(0,8).map(function(w){return '<span class="chip bad" style="text-transform:none;letter-spacing:0;font-size:14px">'+esc(w)+'</span>';}).join('')+'</div></div>'+
@@ -441,8 +441,9 @@ function vResult(a,teacherView){
   var out=teacherView?'':'<main class="in"><div><button class="btn ghost" data-a="home" style="padding-left:0">← Moje kartkówki</button></div>';
   out+='<div class="stack">'+(teacherView?'<p class="meta">'+esc(a.student)+(a.class_name?' · '+esc(a.class_name):'')+' · '+fmtDate(a.finished_at)+'</p>':'')+'<h1>'+esc(a.title)+'</h1></div>';
   var head=teacherView?esc(a.student):p===100?'Bezbłędnie! Świetna robota.':p>=70?'Dobra robota!':p>=40?'Nieźle! Zobacz, co poprawić.':'Warto jeszcze powtórzyć.';
-  if(isP)out+='<section class="score"><div class="big">'+a.base_score+'<small>/'+a.base_total+'</small></div><h2>'+head+'</h2><p class="meta">'+p+'% poprawnych w ćwiczeniu</p></section>';
-  else out+='<section class="score"><div class="big">'+a.base_score+'<small>/'+a.base_total+'</small></div><h2>'+head+'</h2><p class="meta">'+p+'% poprawnych w kartkówce'+(a.extra_total?' · powtórki: '+a.extra_score+'/'+a.extra_total:'')+'</p><div class="grade">Ocena: <b>'+g[0]+'</b> ('+g[1]+')</div></section>'+practiceCard(a,teacherView);
+  if(isP)out+='<section class="score"><div class="big">'+p+'<small>%</small></div><h2>'+head+'</h2><p class="meta">'+a.base_score+' z '+a.base_total+' poprawnie w ćwiczeniu</p></section>';
+  else if(teacherView)out+='<section class="score"><div class="big">'+a.base_score+'<small>/'+a.base_total+'</small></div><h2>'+head+'</h2><p class="meta">'+p+'% poprawnych w kartkówce'+(a.extra_total?' · powtórki: '+a.extra_score+'/'+a.extra_total:'')+'</p><div class="grade">Ocena: <b>'+g[0]+'</b> ('+g[1]+')</div></section>'+practiceCard(a,teacherView);
+  else out+='<section class="score"><div class="big">'+p+'<small>%</small></div><h2>'+head+'</h2><p class="meta">'+a.base_score+' z '+a.base_total+' poprawnie'+(a.extra_total?' · powtórki: '+a.extra_score+' z '+a.extra_total:'')+'</p><div class="track" style="max-width:320px"><span style="width:'+p+'%;background:'+color(p)+'"></span></div></section>'+practiceCard(a,teacherView);
   out+='<div class="tasks">';
   var base=a.items.filter(function(x){return !x.extra;}).length;
   a.items.forEach(function(it,i){
@@ -547,15 +548,15 @@ function openAttempt(id){
 
 /* --- hard words --- */
 function tWords(){
-  var ws=S.words||[];
-  var out='<div class="stack"><h1>Najtrudniejsze <span class="mark">słowa</span></h1><p class="lead">Słówka i zadania, w których uczniowie robią najwięcej błędów. Kliknij wiersz, żeby zobaczyć, kto ma z nim kłopot.</p></div>';
+  var ws=(S.words||[]).filter(function(w){return w.type==='vocab';});
+  var out='<div class="stack"><h1>Najtrudniejsze <span class="mark">słowa</span></h1><p class="lead">Słówka do przetłumaczenia z polskiego na angielski, w których uczniowie robią najwięcej błędów. Kliknij wiersz, żeby zobaczyć, kto ma z nim kłopot.</p></div>';
   out+='<div class="filters"><label class="f">Klasa'+classSelect('f-wc',S.wclass||'')+'</label></div>';
   if(!ws.length)return out+'<div class="empty">Na razie brak błędów do pokazania. Statystyki pojawią się po pierwszych kartkówkach.</div>';
   var top=ws.slice(0,3);
-  out+='<div class="stats">'+top.map(function(w,i){return '<div class="stat"><span>'+(i+1)+'. najtrudniejsze</span><b style="font-size:24px">'+esc(w.type==='vocab'?w.prompt:w.answer)+'</b><span>'+w.errors+' '+pl(w.errors,'błąd','błędy','błędów')+' · '+w.err_students+' '+pl(w.err_students,'uczeń','uczniów','uczniów')+'</span></div>';}).join('')+'</div>';
-  out+='<div class="tw"><table><thead><tr><th class="n">#</th><th>Słowo / zadanie</th><th>Poprawna odpowiedź</th><th class="n">Błędy</th><th class="n">Uczniów z błędem</th><th>Skuteczność</th><th class="n">Wciąż do powtórki</th></tr></thead><tbody>';
+  out+='<div class="stats">'+top.map(function(w,i){return '<div class="stat"><span>'+(i+1)+'. najtrudniejsze</span><b style="font-size:24px">'+esc(w.prompt)+'</b><span>'+w.errors+' '+pl(w.errors,'błąd','błędy','błędów')+' · '+w.err_students+' '+pl(w.err_students,'uczeń','uczniów','uczniów')+'</span></div>';}).join('')+'</div>';
+  out+='<div class="tw"><table><thead><tr><th class="n">#</th><th>Słowo po polsku</th><th>Poprawna odpowiedź</th><th class="n">Błędy</th><th class="n">Uczniów z błędem</th><th>Skuteczność</th><th class="n">Wciąż do powtórki</th></tr></thead><tbody>';
   ws.forEach(function(w,i){var eff=pct(w.corrects,w.corrects+w.errors), open=S.wopen===w.key;
-    out+='<tr class="click" data-a="wopen" data-id="'+esc(w.key)+'" tabindex="0"><td class="n meta">'+(i+1)+'</td><td>'+(w.type==='vocab'?'<b>'+esc(w.prompt)+'</b>':esc(w.prompt))+'</td><td><b>'+esc(w.answer)+'</b></td><td class="n"><b>'+w.errors+'</b></td><td class="n">'+w.err_students+' / '+w.seen_students+'</td><td>'+bar(eff)+'</td><td class="n">'+(w.repeat_students?'<span class="chip bad">'+w.repeat_students+' '+pl(w.repeat_students,'uczeń','uczniów','uczniów')+'</span>':'<span class="chip ok">nikt</span>')+'</td></tr>';
+    out+='<tr class="click" data-a="wopen" data-id="'+esc(w.key)+'" tabindex="0"><td class="n meta">'+(i+1)+'</td><td><b>'+esc(w.prompt)+'</b></td><td><b>'+esc(w.answer)+'</b></td><td class="n"><b>'+w.errors+'</b></td><td class="n">'+w.err_students+' / '+w.seen_students+'</td><td>'+bar(eff)+'</td><td class="n">'+(w.repeat_students?'<span class="chip bad">'+w.repeat_students+' '+pl(w.repeat_students,'uczeń','uczniów','uczniów')+'</span>':'<span class="chip ok">nikt</span>')+'</td></tr>';
     if(open)out+='<tr><td></td><td colspan="6"><div class="row" style="gap:6px">'+(w.students||[]).map(function(s){return '<span class="chip '+(s.to_repeat?'bad':'mute')+'" style="text-transform:none;letter-spacing:0;font-size:13px">'+esc(s.name)+(s.class_name?' ('+esc(s.class_name)+')':'')+' · '+s.errors+'×'+(s.to_repeat?'':' ✓')+'</span>';}).join('')+'</div><p class="meta" style="margin-top:6px">Czerwone: słówko wciąż w powtórkach. Szare z ✓: już opanowane.</p></td></tr>';
   });
   return out+'</tbody></table></div>';
@@ -580,7 +581,7 @@ function parseLines(text,enFirst){
   var items=[],errors=[];
   String(text||'').split(/\r?\n/).forEach(function(raw,idx){
     var line=raw.trim();if(!line||line.indexOf('//')===0)return;
-    line=line.replace(/^\d+[.)]\s+/,'').replace(/^[-•*]\s+/,'');
+    line=line.replace(/^\d+[.)]\s+/,'').replace(/^[-•*]\s+/,'').replace(/^(?:vocabulary|vocab|word|gap sentence|gap|multiple choice|choice|słówko|slowko|luka|wybór|wybor)\s*[:\-–]\s*/i,'');
     var explain='',hi=line.indexOf(' #');if(hi<0&&line.indexOf('#')>0)hi=line.indexOf('#')-1;
     if(hi>=0){explain=line.slice(hi+2).trim();line=line.slice(0,hi).trim();}
     var left,right,m,i;
@@ -609,7 +610,8 @@ function aiPrompt(g){
   var types={mixed:'mieszane: słówka, zdania z luką i zadania wyboru',vocab:'tylko słówka (polskie słowo → angielskie)',gap:'tylko zdania z luką',choice:'tylko zadania wyboru'}[g.type];
   return 'Jesteś nauczycielem angielskiego w polskiej szkole (uczniowie 13–16 lat). Przygotuj '+n+' zadań na kartkówkę.\n'+
    'Temat: '+(g.topic||'powtórka ogólna')+'\nPoziom: '+g.level+'\nRodzaj zadań: '+types+'\n'+(g.notes?'Uwagi: '+g.notes+'\n':'')+
-   '\nZwróć WYŁĄCZNIE linie w poniższym formacie, jedno zadanie w linii, bez numeracji, nagłówków i komentarzy.\n'+
+   (String(g.examples||'').trim()?'\nZrób zadanie z każdego z tych przykładowych zdań (zostaw zdanie, ukryj kluczowe słowo lub formę), a resztę ułóż w podobnym stylu:\n'+String(g.examples).trim()+'\n':'')+
+   '\nZwróć WYŁĄCZNIE linie w poniższym formacie, jedno zadanie w linii, bez numeracji, nagłówków, komentarzy i etykiet (nie pisz „Słówko:”, „Zdanie z luką:” ani „Wybór:” przed zadaniem).\n'+
    '1) Słówko: polskie słowo = angielskie tłumaczenie (kilka poprawnych wersji oddziel znakiem /)\n   pies = dog\n   iść pieszo = walk / go on foot\n'+
    '2) Zdanie z luką: angielskie zdanie z ___ i formą podstawową w nawiasie = poprawna odpowiedź / inne poprawne wersje # krótkie wyjaśnienie po polsku\n   She ___ (not / like) fish. = doesn\'t like / does not like # przeczenie w 3. os. l.p.\n'+
    '3) Wybór: angielskie zdanie z ___ = poprawna odpowiedź [opcja | opcja | opcja]\n   Look! It ___ outside. = is snowing [snows | is snowing | snow]\n'+
@@ -617,7 +619,7 @@ function aiPrompt(g){
 }
 function newEditor(q){
   return {id:q?q.id:null,title:q?q.title:'',class_name:q?q.class_name:'',extra_count:q?q.extra_count:5,is_open:q?q.is_open:true,allow_retake:q?q.allow_retake:false,
-    text:q?q.items.map(toLine).join('\n'):'',enFirst:false,ai:{topic:'',level:'A2+ (klasa 8)',count:10,type:'mixed',notes:''},showAi:!q};
+    text:q?q.items.map(toLine).join('\n'):'',enFirst:false,ai:{topic:'',level:'A2+ (klasa 8)',count:10,type:'mixed',notes:'',examples:''},showAi:!q};
 }
 function tEditor(){
   var e=S.edit, p=parseLines(e.text,e.enFirst);
@@ -632,7 +634,8 @@ function tEditor(){
      '<label class="f">Poziom<select class="inp" id="ai-level" data-ai="level">'+['A1 (klasy 4–5)','A2 (klasy 6–7)','A2+ (klasa 8)','B1 (egzamin ósmoklasisty / 1 LO)','B1+ (1–2 LO)','B2 (2–3 LO)'].map(function(l){return '<option'+(l===e.ai.level?' selected':'')+'>'+l+'</option>';}).join('')+'</select></label>'+
      '<label class="f">Liczba zadań<input class="inp" type="number" min="1" max="40" id="ai-count" data-ai="count" value="'+esc(e.ai.count)+'"></label>'+
      '<label class="f">Rodzaj<select class="inp" id="ai-type" data-ai="type">'+[['mixed','Mieszane'],['vocab','Słówka'],['gap','Zdania z luką'],['choice','Wybór odpowiedzi']].map(function(o){return '<option value="'+o[0]+'"'+(o[0]===e.ai.type?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></label>'+
-     '<label class="f" style="grid-column:1/-1">Uwagi (opcjonalnie)<input class="inp" id="ai-notes" data-ai="notes" value="'+esc(e.ai.notes)+'" placeholder="np. słówka z rozdziału 4, bez phrasal verbs"></label></div>'+
+     '<label class="f" style="grid-column:1/-1">Uwagi (opcjonalnie)<input class="inp" id="ai-notes" data-ai="notes" value="'+esc(e.ai.notes)+'" placeholder="np. słówka z rozdziału 4, bez phrasal verbs"></label>'+
+     '<label class="f" style="grid-column:1/-1">Przykładowe zdania (opcjonalnie) <span class="meta" style="font-weight:400">– jedno w linii; AI zrobi z każdego zadanie, a resztę ułoży w podobnym stylu</span><textarea class="inp" rows="4" id="ai-examples" data-ai="examples" placeholder="I have never been to London.&#10;She was reading when the phone rang.">'+esc(e.ai.examples)+'</textarea></label></div>'+
      '<div class="row"><button class="btn primary" data-a="aigen"'+(S.aiBusy?' disabled':'')+'>'+(S.aiBusy?'<span class="spin"></span> AI układa zadania…':'✨ Wygeneruj zadania')+'</button></div>'+
      (S.aiErr?'<p class="msg err">'+S.aiErr+'</p>':'')+(S.aiOk?'<p class="msg ok">'+esc(S.aiOk)+'</p>':'')+
      '<details><summary class="meta" style="cursor:pointer">Bez API: skopiuj polecenie do Claude albo ChatGPT</summary><div class="stack" style="margin-top:8px"><div class="code" id="ai-out">'+esc(aiPrompt(e.ai))+'</div><div class="row"><button class="btn" data-a="copyai">Kopiuj polecenie</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Otwórz Claude ↗</a></div></div></details>';
@@ -644,14 +647,14 @@ function tEditor(){
    '<label class="check"><input type="checkbox" id="e-enfirst" data-e="enFirst"'+(e.enFirst?' checked':'')+'> W mojej liście słówek najpierw jest angielskie słowo (dog = pies)</label></div>'+
    '<div class="card"><div class="row"><h2>Podgląd</h2><span class="spacer"></span><span class="chip" id="pv-count">'+p.items.length+'</span></div><div id="pv">'+previewHtml(p)+'</div></div></section>';
   if(S.saveErr)out+='<p class="msg err">'+esc(S.saveErr)+'</p>';
-  out+='<div class="actions"><button class="btn" data-a="cancelquiz">Anuluj</button><button class="btn primary big" data-a="savequiz"'+(S.saving?' disabled':'')+'>'+(S.saving?'<span class="spin"></span> Zapisuję…':'Zapisz kartkówkę')+'</button></div>';
+  out+='<div class="actions"><button class="btn" data-a="cancelquiz">Anuluj</button><button class="btn primary big" data-a="savequiz"'+(S.saving?' disabled':'')+'>'+(S.saving?'<span class="spin"></span> Zapisuję…':''+(S.edit&&S.edit.id?'Zapisz zmiany':'Wyślij do klasy'))+'</button></div>';
   return out;
 }
 function previewHtml(p){
   if(!p.items.length&&!p.errors.length)return '<p class="meta">Tu zobaczysz, jak aplikacja odczytała zadania.</p>';
   var o='<div class="preview">';
-  p.errors.forEach(function(er){o+='<div class="pv err"><span>!</span><span>Linia '+er.n+'</span><span>'+esc(er.raw)+' – <b>'+esc(er.msg)+'</b></span></div>';});
-  p.items.forEach(function(it,i){o+='<div class="pv"><span class="meta">'+(i+1)+'.</span><span class="chip mute" style="justify-self:start">'+({vocab:'słówko',gap:'luka',choice:'wybór'})[it.type]+'</span><span>'+esc(it.prompt)+' → <span class="ans">'+esc(it.answers.join(' / '))+'</span>'+(it.options?' <span class="meta">['+esc(it.options.join(' | '))+']</span>':'')+(it.explain?' <span class="meta">💡 '+esc(it.explain)+'</span>':'')+'</span></div>';});
+  p.errors.forEach(function(er){o+='<div class="pv err"><span>!</span><span>Linia '+er.n+': '+esc(er.raw)+' – <b>'+esc(er.msg)+'</b></span></div>';});
+  p.items.forEach(function(it,i){o+='<div class="pv"><span class="meta">'+(i+1)+'.</span><span>'+esc(it.prompt)+' → <span class="ans">'+esc(it.answers.join(' / '))+'</span>'+(it.options?' <span class="meta">['+esc(it.options.join(' | '))+']</span>':'')+(it.explain?' <span class="meta">💡 '+esc(it.explain)+'</span>':'')+'</span></div>';});
   return o+'</div>';
 }
 function refreshPreview(){var p=parseLines(S.edit.text,S.edit.enFirst),el=document.getElementById('pv'),c=document.getElementById('pv-count');if(el)el.innerHTML=previewHtml(p);if(c)c.textContent=p.items.length;}
@@ -659,7 +662,7 @@ function generateQuizAI(){
   var e=S.edit;
   if(!e.ai.topic.trim()){S.aiErr='Wpisz temat, żeby AI wiedziało, o czym ułożyć zadania.';S.aiOk='';render();return;}
   S.aiBusy=true;S.aiErr='';S.aiOk='';render();
-  aiCall({action:'quiz',topic:e.ai.topic,level:e.ai.level,count:e.ai.count,type:e.ai.type,notes:e.ai.notes},true).then(function(r){
+  aiCall({action:'quiz',topic:e.ai.topic,level:e.ai.level,count:e.ai.count,type:e.ai.type,notes:e.ai.notes,examples:e.ai.examples},true).then(function(r){
     var lines=String(r&&r.lines||'').trim();
     if(!lines)throw {code:'ai_bad_output'};
     e.text=e.text.trim()?e.text.replace(/\s+$/,'')+'\n'+lines:lines;
@@ -677,7 +680,7 @@ function saveQuiz(){
   if(!p.items.length){S.saveErr='Dodaj co najmniej jedno zadanie.';render();return;}
   S.saving=true;S.saveErr='';render();
   trpc('t_save_quiz',{p_id:e.id,p_title:e.title,p_class_name:e.class_name,p_items:p.items,p_extra_count:parseInt(e.extra_count,10)||0,p_is_open:e.is_open,p_allow_retake:e.allow_retake}).then(function(){
-    S.saving=false;S.edit=null;S.flash='Zapisano kartkówkę „'+e.title+'”.';loadTab();
+    S.saving=false;S.edit=null;S.flash=(e.id?'Zapisano zmiany w kartkówce „'+e.title+'”.':'Wysłano! Kartkówka „'+e.title+'” jest dostępna dla '+(e.class_name.trim()?'klasy '+e.class_name.trim():'wszystkich klas')+'.')+(e.is_open?'':' (Jest zamknięta – uczniowie zobaczą ją, gdy ją otworzysz.)');loadTab();
   }).catch(function(er){S.saving=false;S.saveErr=errText(er);render();});
 }
 
