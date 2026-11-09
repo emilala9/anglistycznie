@@ -14,6 +14,7 @@ window.CONFIG = {
 };
 /* ========================================================== */
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@600;700&display=swap">
 <style>
@@ -184,6 +185,13 @@ tr.click:hover td{background:var(--paper)}
 .slip{border:1px dashed var(--muted);border-radius:10px;padding:12px 14px;background:var(--card)}
 .slip b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px}
 .print-only{display:none}
+.qrov{position:fixed;inset:0;z-index:30;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));text-align:center;overflow:auto}
+.qrov .qr{width:min(62vh,86vw);aspect-ratio:1;background:#fff;padding:8px;border-radius:16px}
+.qrov .qr svg{width:100%;height:100%;display:block}
+.qrov .qr svg rect[fill="#ffffff"],.qrov .qr svg path{shape-rendering:crispEdges}
+.qrov h1{font-size:clamp(26px,4vw,44px)}
+.qrov .url{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:clamp(15px,2vw,20px);word-break:break-all;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.qrov .top{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:8px}
 @media (max-width:760px){.cols{grid-template-columns:1fr}}
 @media (max-width:520px){.task{grid-template-columns:1fr}.score{grid-template-columns:1fr}.score .big{grid-row:auto}.sentence{font-size:18px}th,td{padding:8px}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}.track span{transition:none}}
@@ -270,6 +278,17 @@ function aiCall(body,asTeacher){return (asTeacher?ensureFresh():Promise.resolve(
 function trpc(fn,args){return ensureFresh().then(function(){return req('/rest/v1/rpc/'+fn,args,headers(true));}).catch(function(e){
   if(e&&(e.status===401||/JWT|session_expired/i.test(e.code))){teacher=null;ls('zad-teacher',null);S={};render();}throw e;});}
 
+/* ---------------- QR ---------------- */
+function appUrl(){return location.origin+location.pathname;}
+function qrSvg(text){try{if(!window.qrcode)return '';var q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag({cellSize:8,margin:2,scalable:true,alt:'Kod QR'});}catch(e){return '';}}
+function qrOverlay(){
+  var svg=qrSvg(S.qr.url);
+  return '<div class="qrov" role="dialog" aria-modal="true" aria-label="Kod QR"><div class="top"><button class="btn" data-a="qrfull">Pełny ekran</button><button class="btn" data-a="qrclose">Zamknij ✕</button></div>'+
+    '<h1>'+esc(S.qr.title)+'</h1><p class="lead">Zeskanuj aparatem w telefonie'+(S.qr.quiz?', zaloguj się i kartkówka otworzy się sama.':' i zaloguj się swoim loginem i PIN-em.')+'</p>'+
+    (svg?'<div class="qr">'+svg+'</div>':'<p class="msg err">Nie udało się wygenerować kodu (brak internetu?). Podaj uczniom adres poniżej.</p>')+
+    '<p class="url">'+esc(S.qr.url)+'</p></div>';
+}
+
 /* ---------------- routing ---------------- */
 function isTeacherRoute(){return /^#nauczyciel/.test(location.hash);}
 window.addEventListener('hashchange',function(){S={};boot();});
@@ -280,6 +299,8 @@ function boot(){
     if(!teacher){S={v:'tlogin'};render();return;}
     S={v:'teacher',tab:ls('zad-tab')||'results'};render();loadTab();
   } else {
+    var dl=/^#kartkowka-([0-9a-f-]{36})$/i.exec(location.hash);
+    if(dl){ls('zad-goto',dl[1]);history.replaceState(null,'',location.pathname+location.search);}
     var st=ls('zad-student');
     if(!st){S={v:'slogin'};render();return;}
     goHome();
@@ -304,7 +325,7 @@ function render(){
     case 'teacher':body=vTeacher();break;
     default:body='<main class="in"><div class="loading"><span class="spin"></span> '+esc(S.msg||'Ładowanie…')+'</div></main>';
   }
-  app.innerHTML=header()+body+(S.sheet?'<div class="sheet" data-a="sheetbg"><div class="pane" role="dialog" aria-modal="true">'+S.sheet+'</div></div>':'');
+  app.innerHTML=header()+body+(S.qr?qrOverlay():'')+(S.sheet?'<div class="sheet" data-a="sheetbg"><div class="pane" role="dialog" aria-modal="true">'+S.sheet+'</div></div>':'');
   if(S.v==='test')updateProgress();
   if(S.focus){var f=document.getElementById(S.focus);S.focus=null;if(f)f.focus();}
 }
@@ -317,7 +338,7 @@ function renderSetup(){
 
 /* ================= STUDENT ================= */
 function vStudentLogin(){
-  return '<main class="in"><form class="login card" id="slf" autocomplete="off"><h1>Cześć! <span class="mark">Zaloguj się</span></h1><p class="meta">Login i PIN dostaniesz od nauczyciela.</p>'+
+  return '<main class="in"><form class="login card" id="slf" autocomplete="off"><h1>Cześć! <span class="mark">Zaloguj się</span></h1><p class="meta">'+(ls('zad-goto')?'Po zalogowaniu od razu otworzy się kartkówka.':'Login i PIN dostaniesz od nauczyciela.')+'</p>'+
    '<label class="f">Login<input class="inp" id="sl-login" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="np. jan.kowalski" required></label>'+
    '<label class="f">PIN<input class="inp pin" id="sl-pin" inputmode="numeric" type="password" maxlength="8" placeholder="••••" required></label>'+
    (S.err?'<p class="msg err">'+S.err+'</p>':'')+
@@ -337,7 +358,7 @@ function sTok(){var s=ls('zad-student');return s&&s.token;}
 function sCall(fn,args){args=args||{};args.p_token=sTok();return rpc(fn,args).catch(function(e){if(/session_expired/.test(e.code)){ls('zad-student',null);S={v:'slogin',err:ERR.session_expired};render();}throw e;});}
 function goHome(){
   S={v:'loading'};render();
-  sCall('student_home').then(function(h){S={v:'shome',home:h};render();window.scrollTo(0,0);}).catch(function(e){if(S.v!=='slogin'){S={v:'shome',err:errText(e)};render();}});
+  sCall('student_home').then(function(h){var g=ls('zad-goto');if(g){ls('zad-goto',null);if(h.quizzes.some(function(q){return q.id===g;})){startQuiz(g);return;}}S={v:'shome',home:h};render();window.scrollTo(0,0);}).catch(function(e){if(S.v!=='slogin'){S={v:'shome',err:errText(e)};render();}});
 }
 function vStudentHome(){
   if(S.err&&!S.home)return '<main class="in"><p class="msg err">'+S.err+'</p><div><button class="btn" data-a="home">Spróbuj ponownie</button></div></main>';
@@ -565,13 +586,13 @@ function tWords(){
 /* --- quizzes --- */
 function tQuizzes(){
   var qs=S.quizzes||[];
-  var out='<div class="row"><div class="stack" style="flex:1;min-width:240px"><h1>Kartkówki</h1><p class="lead">Kartkówka jest wspólna dla klasy. Każdy uczeń dostaje do niej dodatkowo swoje słówka do powtórki.</p></div><button class="btn primary big" data-a="newquiz">＋ Nowa kartkówka</button></div>';
+  var out='<div class="row"><div class="stack" style="flex:1;min-width:240px"><h1>Kartkówki</h1><p class="lead">Kartkówka jest wspólna dla klasy. Każdy uczeń dostaje do niej dodatkowo swoje słówka do powtórki.</p></div><div class="row"><button class="btn big" data-a="qrapp">Kod QR do logowania</button><button class="btn primary big" data-a="newquiz">＋ Nowa kartkówka</button></div></div>';
   if(S.flash)out+='<p class="msg ok">'+esc(S.flash)+'</p>';
   if(!qs.length)return out+'<div class="empty">Nie ma jeszcze kartkówek. Kliknij „Nowa kartkówka”.</div>';
   out+='<div class="cards">';
   qs.forEach(function(q){
     out+='<article class="card"><div class="qcard"><div class="stack" style="gap:4px"><div class="row" style="gap:6px">'+(q.is_open?'<span class="chip ok">Otwarta</span>':'<span class="chip mute">Zamknięta</span>')+'<span class="chip">'+esc(q.class_name||'Wszystkie klasy')+'</span>'+(q.allow_retake?'<span class="chip mute">Można poprawiać</span>':'')+'</div><h3>'+esc(q.title)+'</h3><p class="meta">'+q.item_count+' '+pl(q.item_count,'zadanie','zadania','zadań')+' + '+q.extra_count+' powtórek · napisało: '+q.done+(q.avg_pct!=null?' · średnio '+q.avg_pct+'%':'')+'</p></div>'+
-      '<div class="row" style="gap:4px"><button class="btn sm" data-a="toggleopen" data-id="'+q.id+'">'+(q.is_open?'Zamknij':'Otwórz')+'</button><button class="btn sm" data-a="editquiz" data-id="'+q.id+'">Edytuj</button><button class="btn sm" data-a="qres" data-id="'+q.id+'">Wyniki</button>'+
+      '<div class="row" style="gap:4px"><button class="btn sm" data-a="toggleopen" data-id="'+q.id+'">'+(q.is_open?'Zamknij':'Otwórz')+'</button><button class="btn sm" data-a="qrquiz" data-id="'+q.id+'">Kod QR</button><button class="btn sm" data-a="editquiz" data-id="'+q.id+'">Edytuj</button><button class="btn sm" data-a="qres" data-id="'+q.id+'">Wyniki</button>'+
       (S.delQ===q.id?'<button class="btn sm danger" data-a="delq2" data-id="'+q.id+'">Usunąć z wynikami?</button><button class="btn sm ghost" data-a="delq0">Anuluj</button>':'<button class="btn sm ghost danger" data-a="delq" data-id="'+q.id+'">Usuń</button>')+'</div></div></article>';
   });
   return out+'</div>';
@@ -689,7 +710,7 @@ function tStudents(){
   var st=S.students||[], fc=S.sc||'';
   var list=st.filter(function(s){return !fc||s.class_name===fc;});
   var out='<div class="stack"><h1>Uczniowie</h1><p class="lead">Każdy uczeń loguje się swoim loginem i 4-cyfrowym PIN-em. PIN widać tylko raz, przy tworzeniu konta lub resecie, więc od razu go zapisz albo wydrukuj kartki.</p></div>';
-  out+='<section class="card"><h2>Dodaj uczniów</h2><div class="grid2"><label class="f">Klasa<input class="inp" id="ns-class" list="dl-cls2" placeholder="np. 8a" value="'+esc(S.nsClass||'')+'"><datalist id="dl-cls2">'+classes().map(function(c){return '<option value="'+esc(c)+'">';}).join('')+'</datalist></label></div>'+
+  out+='<div><button class="btn" data-a="qrapp">Pokaż kod QR do logowania</button></div><section class="card"><h2>Dodaj uczniów</h2><div class="grid2"><label class="f">Klasa<input class="inp" id="ns-class" list="dl-cls2" placeholder="np. 8a" value="'+esc(S.nsClass||'')+'"><datalist id="dl-cls2">'+classes().map(function(c){return '<option value="'+esc(c)+'">';}).join('')+'</datalist></label></div>'+
    '<label class="f">Imiona i nazwiska – jedna osoba w linii<textarea class="inp" id="ns-names" rows="5" placeholder="Jan Kowalski&#10;Zofia Nowak">'+esc(S.nsNames||'')+'</textarea></label>'+
    '<div class="row"><button class="btn primary" data-a="addstudents"'+(S.adding?' disabled':'')+'>'+(S.adding?'<span class="spin"></span> Tworzę konta…':'Utwórz konta')+'</button></div></section>';
   if(S.newAcc&&S.newAcc.length){
@@ -740,6 +761,10 @@ app.addEventListener('click',function(ev){
     case 'tpractice':S.sheet='<div class="loading"><span class="spin"></span> Ładowanie…</div>';render();
       trpc('t_practice',{p_attempt_id:id}).then(function(p){S.sheet='<div class="row"><button class="btn ghost" data-a="tattempt" data-id="'+id+'" style="padding-left:0">← Kartkówka</button><span class="spacer"></span><button class="btn" data-a="sheetclose">Zamknij ✕</button></div>'+vResult(p,true);render();}).catch(function(e){S.sheet='<p class="msg err">'+errText(e)+'</p><button class="btn" data-a="sheetclose">Zamknij</button>';render();});break;
     case 'aigen':generateQuizAI();break;
+    case 'qrapp':S.qr={title:'Zadanko English – logowanie',url:appUrl()};render();break;
+    case 'qrquiz':var qq=(S.quizzes||[]).filter(function(x){return x.id===id;})[0];S.qr={title:qq?qq.title:'Kartkówka',url:appUrl()+'#kartkowka-'+id,quiz:true};render();break;
+    case 'qrclose':S.qr=null;try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}render();break;
+    case 'qrfull':try{var el=document.querySelector('.qrov');if(el&&el.requestFullscreen)el.requestFullscreen().catch(function(){});}catch(e){}break;
     case 'sattempt':S={v:'loading'};render();sCall('student_attempt',{p_attempt_id:id}).then(function(r){S={v:'result',att:r};render();window.scrollTo(0,0);}).catch(function(){goHome();});break;
     case 'pick':var i=+b.getAttribute('data-i');S.answers[i]=b.getAttribute('data-v');ls('zad-draft-'+S.t.attempt_id,S.answers);b.parentNode.querySelectorAll('.opt').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});updateProgress();break;
     case 'submit':if(filled()<S.t.items.length){S.warn=true;render();var w=app.querySelector(".warnbox");if(w)w.scrollIntoView({block:'center'});}else submitTest();break;
@@ -785,6 +810,7 @@ app.addEventListener('click',function(ev){
   }
 });
 document.addEventListener('keydown',function(ev){
+  if(ev.key==='Escape'&&S.qr){S.qr=null;render();return;}
   if(ev.key==='Escape'&&S.sheet){S.sheet=null;S.delAtt=null;render();return;}
   var t=ev.target;
   if(ev.key==='Enter'&&t.matches&&t.matches('tr.click')){t.click();return;}
