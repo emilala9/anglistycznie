@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zadanko English</title>
+<script>
+/* =====================  KONFIGURACJA  =====================
+   Wklej tu dwie wartości z Supabase:
+   Project Settings → Data API (URL)  oraz  API Keys (anon / publishable key)  */
+window.CONFIG = {
+  SUPABASE_URL: "https://fwudxfobvccoerjmwezp.supabase.co",          // np. https://abcdefgh.supabase.co
+  SUPABASE_KEY: "sb_publishable_QAMwqQjyXbg-V5WWKu8vuw_X2KKABPJ"         // długi klucz "anon" albo "sb_publishable_..."
+};
+/* ========================================================== */
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Caveat:wght@600;700&display=swap">
+<style>
+/* Notebook-and-red-pen classroom world. One centred working column; teacher area widens for tables. */
+:root{
+  --paper:#F4F6FB; --card:#FFFFFF; --ink:#18213D; --muted:#5B6584; --line:#DDE2EE;
+  --accent:#2C55E0; --accent-ink:#FFFFFF; --accent-soft:#E6ECFD;
+  --hl:#FFE14D; --on-hl:#18213D;
+  --ok:#17824A; --ok-bg:#E2F4E9; --bad:#D3203A; --bad-bg:#FCE7EA; --warn-bg:#FFF6D6;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-pen:"Caveat","Comic Sans MS",cursive;
+  --r:14px; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#0F1428; --card:#182039; --ink:#E7EBF7; --muted:#9AA4C3; --line:#2B3457;
+  --accent:#7D9BFF; --accent-ink:#0F1428; --accent-soft:#232E57;
+  --hl:#E9C53A; --on-hl:#18213D;
+  --ok:#4CCB86; --ok-bg:#15301F; --bad:#FF6F80; --bad-bg:#3A1A24; --warn-bg:#3A3215; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.bar{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.in{max-width:820px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wide .in{max-width:1120px}
+.bar .in{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
+.brand i{font-style:normal;background:var(--hl);color:var(--on-hl);padding:0 6px;border-radius:6px;transform:rotate(-2deg);display:inline-block}
+.spacer{flex:1}
+.who{font-size:14px;color:var(--muted)}
+main.in{padding-block:28px 80px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.015em}
+h1{font-size:clamp(28px,5vw,40px);font-weight:800;line-height:1.1}
+h2{font-size:22px;font-weight:800}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+.mark{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 2px}
+.lead{color:var(--muted);max-width:62ch}
+.meta{color:var(--muted);font-size:14px}
+.stack{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:700;font-size:15px;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.big{padding:13px 24px;font-size:17px;border-radius:12px}
+.btn.sm{padding:5px 10px;font-size:14px;border-radius:8px}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink)}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.chip{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chip.bad{background:var(--bad-bg);color:var(--bad)}
+.chip.warn{background:var(--warn-bg);color:var(--ink)}
+.chip.mute{background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.cards{display:grid;gap:14px}
+.msg{font-size:15px;padding:10px 12px;border-radius:9px}
+.msg.err{background:var(--bad-bg);color:var(--bad)}
+.msg.info{background:var(--accent-soft)}
+.msg.ok{background:var(--ok-bg);color:var(--ok)}
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;color:var(--muted);background:var(--card)}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:700;color:var(--muted);min-width:0}
+.inp{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:9px 11px;font-size:16px;font-weight:400;color:var(--ink)}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
+.card .inp{background:var(--paper)}
+.check{display:flex;gap:8px;align-items:center;font-size:15px;font-weight:400;color:var(--ink);cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(1turn)}}
+.loading{display:flex;gap:10px;align-items:center;color:var(--muted);padding:30px 0}
+/* login */
+.login{max-width:420px;margin:6vh auto 0;width:100%}
+.login h1{font-size:34px}
+.pin{letter-spacing:.4em;font-size:22px;text-align:center}
+/* student home */
+.qcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.qcard>div{min-width:0}
+.review{display:flex;flex-direction:column;gap:0}
+.rv{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--line)}
+.rv:last-child{border-bottom:0}
+.rv .p{flex:1;min-width:0}
+.rv .a{font-weight:700}
+.times{font-family:var(--f-pen);font-size:24px;color:var(--bad);line-height:1;white-space:nowrap}
+.hist{display:flex;flex-direction:column}
+.hrow{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;text-align:left;width:100%}
+.hrow:hover .t{color:var(--accent)}
+.hrow .t{flex:1;min-width:0;font-weight:700}
+.hrow:last-child{border-bottom:0}
+/* test */
+.progress{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;position:sticky;top:calc(58px + env(safe-area-inset-top,0px));z-index:4;background:var(--paper);padding-block:8px}
+.track{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.track span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s}
+.tasks{display:flex;flex-direction:column;gap:14px}
+.task{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+.task>.body{min-width:0;display:flex;flex-direction:column;gap:10px}
+.num{font-family:var(--f-display);font-weight:800;font-size:15px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1px solid var(--line);font-variant-numeric:tabular-nums;flex:none}
+.task.extra .num{background:var(--hl);color:var(--on-hl);border-color:var(--hl)}
+.kind{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.sentence{font-size:19px;line-height:2;overflow-wrap:anywhere}
+.word{font-family:var(--f-display);font-weight:600;font-size:26px;line-height:1.2}
+.gap{width:9.5em;max-width:100%;border:0;border-bottom:2px solid var(--accent);background:var(--accent-soft);border-radius:6px 6px 0 0;padding:2px 8px;font-size:18px;text-align:center}
+.gap:focus,.full:focus{outline:none;background:var(--hl);color:var(--on-hl)}
+.full{width:100%;border:1px solid var(--line);border-bottom:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:18px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:7px 16px;cursor:pointer;font-size:17px}
+.opt:hover{border-color:var(--accent)}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.sect{display:flex;flex-direction:column;gap:4px;padding:8px 0 0}
+.sect h2 .chip{vertical-align:middle;margin-left:6px}
+.task.ok{border-color:var(--ok);background:var(--ok-bg)}
+.task.bad{border-color:var(--bad);background:var(--bad-bg)}
+.task.ok .num{background:var(--ok);color:var(--card);border-color:var(--ok)}
+.task.bad .num{background:var(--bad);color:var(--card);border-color:var(--bad)}
+.verdict{font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.ok .verdict{color:var(--ok)} .bad .verdict{color:var(--bad)}
+.yours{text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:2px;color:var(--muted)}
+.pen{font-family:var(--f-pen);color:var(--bad);font-size:28px;line-height:1.1;font-weight:700}
+.filled{font-weight:700;background:var(--hl);color:var(--on-hl);padding:0 5px;border-radius:4px}
+.why{font-size:15px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.rep{font-size:14px;font-weight:700}
+.ok .rep{color:var(--ok)} .bad .rep{color:var(--bad)}
+.score{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:grid;grid-template-columns:auto 1fr;gap:6px 22px;align-items:center}
+.score .big{font-family:var(--f-display);font-weight:800;font-size:56px;line-height:1;font-variant-numeric:tabular-nums;grid-row:span 3}
+.score .big small{font-size:26px;color:var(--muted)}
+.grade{font-family:var(--f-pen);font-size:30px;color:var(--bad);line-height:1}
+.grade b{font-size:44px}
+.warnbox{background:var(--warn-bg);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+/* teacher */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-size:15px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.filters label.f{min-width:160px;flex:0 1 240px}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;background:var(--card);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--paper)}
+.barc{display:flex;align-items:center;gap:8px;min-width:130px}
+.barc .tr{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden;min-width:50px}
+.barc .tr span{display:block;height:100%;border-radius:99px}
+.barc b{font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right;font-size:14px}
+.gr{font-family:var(--f-pen);font-size:24px;font-weight:700;line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.stat b{display:block;font-family:var(--f-display);font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.preview{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.pv{display:grid;grid-template-columns:28px 92px 1fr;gap:8px;align-items:baseline;font-size:15px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.pv>*{min-width:0;overflow-wrap:anywhere}
+.pv .ans{color:var(--ok);font-weight:700}
+.pv.err{color:var(--bad)}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:12px;white-space:pre-wrap;max-height:260px;overflow:auto}
+.cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+.sheet{position:fixed;inset:0;z-index:20;background:rgb(10 14 30 / .45);display:flex;justify-content:flex-end}
+.sheet .pane{background:var(--paper);width:min(720px,100%);height:100%;overflow:auto;padding:20px max(16px,env(safe-area-inset-right,0px)) 40px 20px;display:flex;flex-direction:column;gap:16px;padding-top:calc(20px + env(safe-area-inset-top,0px))}
+.slips{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.slip{border:1px dashed var(--muted);border-radius:10px;padding:12px 14px;background:var(--card)}
+.slip b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px}
+.print-only{display:none}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+@media (max-width:520px){.task{grid-template-columns:1fr}.score{grid-template-columns:1fr}.score .big{grid-row:auto}.sentence{font-size:18px}th,td{padding:8px}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}.track span{transition:none}}
+@media print{
+  body{background:#fff;color:#000}
+  body *{visibility:hidden}
+  .printable,.printable *{visibility:visible}
+  .printable{position:absolute;left:0;top:0;width:100%}
+  .printable .no-print{display:none}
+  .slip{break-inside:avoid;border-color:#000;background:#fff}
+  .print-only{display:block}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+"use strict";
+var C=window.CONFIG||{}, URL_=String(C.SUPABASE_URL||'').replace(/\/+$/,''), KEY=String(C.SUPABASE_KEY||'');
+var CONFIGURED=/^https:\/\/.+/.test(URL_)&&KEY.length>20&&KEY.indexOf('WKLEJ')<0;
+var app=document.getElementById('app');
+var S={};               // view state
+var TYPE_LABEL={vocab:'Przetłumacz na angielski',gap:'Uzupełnij lukę',choice:'Wybierz poprawną odpowiedź'};
+
+/* ---------------- utils ---------------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||'null');if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
+function pct(a,b){return b?Math.round(a/b*100):0;}
+function grade(p){if(p>=96)return [6,'celujący'];if(p>=85)return [5,'bardzo dobry'];if(p>=70)return [4,'dobry'];if(p>=55)return [3,'dostateczny'];if(p>=40)return [2,'dopuszczający'];return [1,'niedostateczny'];}
+function pl(n,a,b,c){var x=n%10,y=n%100;return n===1?a:(x>=2&&x<=4&&!(y>=12&&y<=14))?b:c;}
+function fmtDate(d){if(!d)return '';var t=new Date(d);return t.toLocaleDateString('pl-PL',{day:'numeric',month:'short'})+', '+t.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});}
+function splitGap(p){var m=/_{2,}/.exec(p||'');return m?[p.slice(0,m.index),p.slice(m.index+m[0].length)]:null;}
+function color(p){return p>=70?'var(--ok)':p>=40?'#D99A00':'var(--bad)';}
+function bar(p,label){return '<div class="barc"><div class="tr"><span style="width:'+Math.max(0,Math.min(100,p))+'%;background:'+color(p)+'"></span></div><b>'+esc(label!=null?label:p+'%')+'</b></div>';}
+function copyText(t,btn){
+  function done(ok){if(btn){var o=btn.textContent;btn.textContent=ok?'Skopiowano ✓':'Zaznacz i skopiuj ręcznie';setTimeout(function(){btn.textContent=o;},1800);}}
+  try{navigator.clipboard.writeText(t).then(function(){done(true);},function(){done(false);});}catch(e){done(false);}
+}
+var ERR={
+  bad_login:'Nieprawidłowy login lub PIN.',
+  session_expired:'Sesja wygasła. Zaloguj się ponownie.',
+  quiz_unavailable:'Ta kartkówka jest już zamknięta albo nie jest dla Twojej klasy.',
+  already_done:'Ta kartkówka jest już napisana.',
+  attempt_not_found:'Nie znaleziono tej kartkówki.',
+  not_teacher:'To konto nie ma uprawnień nauczyciela.',
+  no_title:'Dodaj tytuł kartkówki.', no_items:'Kartkówka musi mieć co najmniej jedno zadanie.', bad_items:'Niektóre zadania są niepełne.',
+  network:'Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.',
+  no_api_key:'AI nie jest jeszcze skonfigurowane: w Supabase brakuje klucza ANTHROPIC_API_KEY (instrukcja, krok 5).',
+  no_service_key:'Funkcja AI nie ma dostępu do bazy. Sprawdź krok 5 instrukcji.',
+  ai_bad_output:'AI zwróciło niepełne zadania. Spróbuj jeszcze raz.',
+  ai_error:'AI chwilowo nie odpowiada. Spróbuj za minutę.',
+  'Requested function was not found':'Funkcja AI nie jest jeszcze wdrożona w Supabase (instrukcja, krok 5).',
+  NOT_FOUND:'Funkcja AI nie jest jeszcze wdrożona w Supabase (instrukcja, krok 5).',
+  'Invalid JWT':'Funkcja AI ma włączone „Verify JWT”. Wyłącz je w ustawieniach funkcji (instrukcja, krok 5).',
+  UNAUTHORIZED_NO_AUTH_HEADER:'Funkcja AI ma włączone „Verify JWT”. Wyłącz je w ustawieniach funkcji (instrukcja, krok 5).',
+  invalid_credentials:'Nieprawidłowy e-mail lub hasło.'
+};
+function errText(e){var c=e&&(e.code||e.message)||'';for(var k in ERR)if(String(c).indexOf(k)>=0)return ERR[k];return 'Coś poszło nie tak ('+esc(String(c).slice(0,120))+'). Spróbuj ponownie.';}
+
+/* ---------------- API ---------------- */
+var teacher=ls('zad-teacher'); // {access_token, refresh_token, expires_at, email}
+function headers(asTeacher){var h={apikey:KEY,'Content-Type':'application/json'};if(asTeacher&&teacher)h.Authorization='Bearer '+teacher.access_token;return h;}
+function req(path,body,h){
+  return fetch(URL_+path,{method:'POST',headers:h,body:JSON.stringify(body||{})}).catch(function(){throw {code:'network'};}).then(function(r){
+    return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+      if(!r.ok){throw {code:(j&&(j.message||j.error_description||j.msg||j.error_code||j.error))||('http_'+r.status),status:r.status};}
+      return j;});
+  });
+}
+function authToken(params,body){
+  return req('/auth/v1/token?grant_type='+params,body,{apikey:KEY,'Content-Type':'application/json'}).then(function(j){
+    teacher={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),email:j.user&&j.user.email};
+    ls('zad-teacher',teacher);return teacher;
+  });
+}
+function ensureFresh(){
+  if(!teacher)return Promise.resolve();
+  if(teacher.expires_at-90>Date.now()/1000)return Promise.resolve();
+  return authToken('refresh_token',{refresh_token:teacher.refresh_token}).catch(function(){teacher=null;ls('zad-teacher',null);throw {code:'session_expired'};});
+}
+function rpc(fn,args){return req('/rest/v1/rpc/'+fn,args,headers(false));}
+function aiCall(body,asTeacher){return (asTeacher?ensureFresh():Promise.resolve()).then(function(){return req('/functions/v1/ai',body,headers(asTeacher));});}
+function trpc(fn,args){return ensureFresh().then(function(){return req('/rest/v1/rpc/'+fn,args,headers(true));}).catch(function(e){
+  if(e&&(e.status===401||/JWT|session_expired/i.test(e.code))){teacher=null;ls('zad-teacher',null);S={};render();}throw e;});}
+
+/* ---------------- routing ---------------- */
+function isTeacherRoute(){return /^#nauczyciel/.test(location.hash);}
+window.addEventListener('hashchange',function(){S={};boot();});
+function boot(){
+  document.body.classList.toggle('wide',isTeacherRoute());
+  if(!CONFIGURED){renderSetup();return;}
+  if(isTeacherRoute()){
+    if(!teacher){S={v:'tlogin'};render();return;}
+    S={v:'teacher',tab:ls('zad-tab')||'results'};render();loadTab();
+  } else {
+    var st=ls('zad-student');
+    if(!st){S={v:'slogin'};render();return;}
+    goHome();
+  }
+}
+
+/* ---------------- render shell ---------------- */
+function header(){
+  var right='';
+  if(S.v==='teacher')right='<span class="who">'+esc(teacher&&teacher.email||'Nauczyciel')+'</span><button class="btn sm" data-a="tlogout">Wyloguj</button>';
+  else if(ls('zad-student')&&S.v&&S.v!=='slogin'){var st=ls('zad-student');right='<span class="who">'+esc(st.name)+(st.class_name?' · '+esc(st.class_name):'')+'</span><button class="btn sm" data-a="slogout">Wyloguj</button>';}
+  return '<header class="bar"><div class="in"><button class="brand" data-a="brand">Zadanko <i>English</i></button>'+(S.v==='teacher'?'<span class="chip">Panel nauczyciela</span>':'')+'<span class="spacer"></span>'+right+'</div></header>';
+}
+function render(){
+  var body='';
+  switch(S.v){
+    case 'slogin':body=vStudentLogin();break;
+    case 'shome':body=vStudentHome();break;
+    case 'test':body=vTest();break;
+    case 'result':body=vResult(S.att,false);break;
+    case 'tlogin':body=vTeacherLogin();break;
+    case 'teacher':body=vTeacher();break;
+    default:body='<main class="in"><div class="loading"><span class="spin"></span> '+esc(S.msg||'Ładowanie…')+'</div></main>';
+  }
+  app.innerHTML=header()+body+(S.sheet?'<div class="sheet" data-a="sheetbg"><div class="pane" role="dialog" aria-modal="true">'+S.sheet+'</div></div>':'');
+  if(S.v==='test')updateProgress();
+  if(S.focus){var f=document.getElementById(S.focus);S.focus=null;if(f)f.focus();}
+}
+function renderSetup(){
+  app.innerHTML='<header class="bar"><div class="in"><span class="brand">Zadanko <i>English</i></span></div></header><main class="in"><h1>Prawie gotowe</h1>'+
+  '<div class="card"><p>Aplikacja nie jest jeszcze połączona z bazą danych. Otwórz plik <b>index.html</b> w Notatniku i na samej górze wklej dwie wartości z Supabase:</p>'+
+  '<div class="code">SUPABASE_URL: "https://twoj-projekt.supabase.co",\nSUPABASE_KEY: "twój klucz anon / publishable"</div>'+
+  '<p class="meta">Znajdziesz je w Supabase: Project Settings → Data API oraz API Keys. Szczegóły są w instrukcji.</p></div></main>';
+}
+
+/* ================= STUDENT ================= */
+function vStudentLogin(){
+  return '<main class="in"><form class="login card" id="slf" autocomplete="off"><h1>Cześć! <span class="mark">Zaloguj się</span></h1><p class="meta">Login i PIN dostaniesz od nauczyciela.</p>'+
+   '<label class="f">Login<input class="inp" id="sl-login" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="np. jan.kowalski" required></label>'+
+   '<label class="f">PIN<input class="inp pin" id="sl-pin" inputmode="numeric" type="password" maxlength="8" placeholder="••••" required></label>'+
+   (S.err?'<p class="msg err">'+S.err+'</p>':'')+
+   '<button class="btn primary big" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'<span class="spin"></span> Loguję…':'Zaloguj się')+'</button>'+
+   '<p class="meta" style="text-align:center"><a href="#nauczyciel" style="color:inherit">Jestem nauczycielem →</a></p></form></main>';
+}
+function studentLogin(){
+  var l=document.getElementById('sl-login').value, p=document.getElementById('sl-pin').value;
+  S.busy=true;S.err='';render();
+  rpc('student_login',{p_login:l,p_pin:p}).then(function(r){
+    if(r.error){S.busy=false;S.err=r.error==='locked'?'Za dużo nieudanych prób. Spróbuj za '+r.minutes+' min albo poproś nauczyciela o nowy PIN.':ERR.bad_login;render();
+      var el=document.getElementById('sl-login');if(el)el.value=l;return;}
+    ls('zad-student',{token:r.token,name:r.name,class_name:r.class_name});goHome();
+  }).catch(function(e){S.busy=false;S.err=errText(e);render();});
+}
+function sTok(){var s=ls('zad-student');return s&&s.token;}
+function sCall(fn,args){args=args||{};args.p_token=sTok();return rpc(fn,args).catch(function(e){if(/session_expired/.test(e.code)){ls('zad-student',null);S={v:'slogin',err:ERR.session_expired};render();}throw e;});}
+function goHome(){
+  S={v:'loading'};render();
+  sCall('student_home').then(function(h){S={v:'shome',home:h};render();window.scrollTo(0,0);}).catch(function(e){if(S.v!=='slogin'){S={v:'shome',err:errText(e)};render();}});
+}
+function vStudentHome(){
+  if(S.err&&!S.home)return '<main class="in"><p class="msg err">'+S.err+'</p><div><button class="btn" data-a="home">Spróbuj ponownie</button></div></main>';
+  var h=S.home, first=(h.student.name||'').split(' ')[0];
+  var todo=h.quizzes.filter(function(q){return !q.last||q.open_attempt;});
+  var out='<main class="in"><div class="stack"><h1>Hej, <span class="mark">'+esc(first)+'</span>!</h1><p class="lead">'+(todo.length?'Masz '+todo.length+' '+pl(todo.length,'kartkówkę','kartkówki','kartkówek')+' do napisania.':'Wszystko napisane. Możesz powtórzyć słówka poniżej.')+'</p></div>';
+  if(S.err)out+='<p class="msg err">'+S.err+'</p>';
+  out+='<section class="stack"><h2>Kartkówki</h2>';
+  if(!h.quizzes.length)out+='<div class="empty">Nie ma teraz żadnych otwartych kartkówek.</div>';
+  else{out+='<div class="cards">';h.quizzes.forEach(function(q){
+    var st=q.open_attempt?'<span class="chip warn">W trakcie</span>':q.last?'<span class="chip ok">Napisana</span>':'<span class="chip">Nowa</span>';
+    var btn;
+    if(q.open_attempt)btn='<button class="btn primary" data-a="start" data-id="'+q.id+'">Kontynuuj →</button>';
+    else if(!q.last)btn='<button class="btn primary" data-a="start" data-id="'+q.id+'">Zacznij →</button>';
+    else btn='<button class="btn" data-a="sattempt" data-id="'+q.last.attempt_id+'">Zobacz wynik</button>'+(q.allow_retake?'<button class="btn primary" data-a="start" data-id="'+q.id+'">Napisz ponownie</button>':'');
+    var res=q.last?' · wynik '+q.last.base_score+'/'+q.last.base_total:'';
+    out+='<article class="card qcard"><div class="stack" style="gap:4px"><div class="row" style="gap:6px">'+st+'</div><h3>'+esc(q.title)+'</h3><p class="meta">'+q.item_count+' '+pl(q.item_count,'zadanie','zadania','zadań')+(q.extra_count&&h.review.length?' + Twoje powtórki':'')+res+'</p></div><div class="row">'+btn+'</div></article>';
+  });out+='</div>';}
+  out+='</section>';
+  out+='<section class="card"><div class="row"><h2>Moje słówka do powtórki</h2><span class="spacer"></span>'+(h.mastered?'<span class="chip ok">Opanowane: '+h.mastered+'</span>':'')+'</div>';
+  if(!h.review.length)out+='<p class="meta">Brak słówek do powtórki. Kiedy pomylisz się na kartkówce, słówko trafi tutaj i wróci na kolejnych kartkówkach.</p>';
+  else{out+='<p class="meta">Te słówka wrócą na Twoich kolejnych kartkówkach. Każdy błąd dodaje jedną powtórkę, każda poprawna odpowiedź jedną zdejmuje.</p><div class="review">';
+    h.review.forEach(function(r){out+='<div class="rv"><div class="p">'+(r.type==='vocab'?esc(r.prompt):'<span class="meta">'+esc(r.prompt)+'</span>')+' → <span class="a">'+esc(r.answer)+'</span></div><span class="times" title="Ile razy jeszcze trzeba odpowiedzieć poprawnie">'+r.to_repeat+'×</span></div>';});
+    out+='</div>';}
+  out+='</section>';
+  if(h.history.length){out+='<section class="card"><h2>Historia</h2><div class="hist">';
+    h.history.forEach(function(a){var p=pct(a.base_score,a.base_total);out+='<button class="hrow" data-a="sattempt" data-id="'+a.attempt_id+'"><span class="t">'+esc(a.title)+'<br><span class="meta" style="font-weight:400">'+fmtDate(a.finished_at)+'</span></span>'+bar(p,a.base_score+'/'+a.base_total)+'</button>';});
+    out+='</div></section>';}
+  return out+'</main>';
+}
+function startQuiz(id){
+  S={v:'loading'};render();
+  sCall('start_attempt',{p_quiz_id:id}).then(function(t){
+    S={v:'test',t:t,answers:ls('zad-draft-'+t.attempt_id)||{}};render();window.scrollTo(0,0);
+  }).catch(function(e){goHome();setTimeout(function(){if(S.v==='shome'){S.err=errText(e);render();}},600);});
+}
+function startPractice(attemptId){
+  var back=S.v==='result'?S.att:null;
+  S={v:'loading',msg:'AI układa ćwiczenie z Twoich błędów… (kilka sekund)'};render();window.scrollTo(0,0);
+  aiCall({action:'practice',token:sTok(),attempt_id:attemptId},false).then(function(r){
+    if(r.none){goHome();return;}
+    if(r.finished){S={v:'result',att:r};render();return;}
+    var key='zad-draft-p-'+r.practice_id;
+    S={v:'test',t:{attempt_id:'p-'+r.practice_id,practice_id:r.practice_id,practice:true,title:r.title,items:r.items},answers:ls(key)||{}};render();
+  }).catch(function(e){
+    if(/session_expired/.test(e.code)){ls('zad-student',null);S={v:'slogin',err:ERR.session_expired};render();return;}
+    S=back?{v:'result',att:back}:{v:'shome'};if(!back){goHome();return;}
+    render();var m=document.createElement('p');m.className='msg err';m.textContent=errText(e).replace(/&amp;/g,'&');var sc=app.querySelector('.score');if(sc)sc.insertAdjacentElement('afterend',m);
+  });
+}
+function filled(){var n=0;S.t.items.forEach(function(it,i){if(String(S.answers[i]||'').trim())n++;});return n;}
+function updateProgress(){var n=filled(),T=S.t.items.length,t=document.getElementById('pg-t'),b=document.getElementById('pg-b');if(t)t.textContent=n+' / '+T;if(b)b.style.width=(n/T*100)+'%';}
+function vTest(){
+  var t=S.t, base=0;t.items.forEach(function(x){if(!x.extra)base++;});
+  var out='<main class="in"><div><button class="btn ghost" data-a="home" style="padding-left:0">← Wróć (odpowiedzi zostaną zapamiętane)</button></div><div class="stack">'+(t.practice?'<span class="chip warn" style="align-self:flex-start">⏱ ok. 2 minuty</span>':'')+'<h1>'+esc(t.title)+'</h1><p class="lead">'+(t.practice?'Krótkie ćwiczenie ze słówek, w których pomyliłeś się na kartkówce. Każde słówko zrobione bezbłędnie zdejmuje jedną powtórkę.':'Uzupełnij wszystkie zadania i kliknij „Sprawdź”. Wynik zobaczysz od razu.')+'</p></div>'+
+    '<div class="progress"><span id="pg-t"></span><div class="track"><span id="pg-b"></span></div></div><div class="tasks">';
+  t.items.forEach(function(it,i){
+    if(i===base&&it.extra)out+='<div class="sect"><h2>Twoje powtórki <span class="chip warn">'+(t.items.length-base)+'</span></h2><p class="meta">Te słówka sprawiły Ci kłopot na poprzednich kartkówkach.</p></div>';
+    var v=S.answers[i]||'';
+    out+='<section class="task'+(it.extra?' extra':'')+'"><div class="num">'+(i+1)+'</div><div class="body"><div class="kind">'+esc(TYPE_LABEL[it.type]||'')+(it.extra&&it.to_repeat?' · jeszcze '+it.to_repeat+'×':'')+'</div>';
+    if(it.type==='vocab'){
+      out+='<p class="word">'+esc(it.prompt)+'</p><input class="full" id="a-'+i+'" data-i="'+i+'" value="'+esc(v)+'" placeholder="po angielsku…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Odpowiedź '+(i+1)+'">';
+    } else if(it.type==='choice'){
+      out+='<p class="sentence">'+esc(it.prompt).replace(/_{2,}/,'<span class="mark">&nbsp;____&nbsp;</span>')+'</p><div class="opts">';
+      (it.options||[]).forEach(function(o){out+='<button class="opt" data-a="pick" data-i="'+i+'" data-v="'+esc(o)+'" aria-pressed="'+(v===o)+'">'+esc(o)+'</button>';});
+      out+='</div>';
+    } else {
+      var sp=splitGap(it.prompt), inp='<input class="gap" id="a-'+i+'" data-i="'+i+'" value="'+esc(v)+'" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Luka w zadaniu '+(i+1)+'">';
+      out+=sp?'<p class="sentence">'+esc(sp[0])+inp+esc(sp[1])+'</p>':'<p class="sentence">'+esc(it.prompt)+'</p>'+inp.replace('class="gap"','class="full"');
+    }
+    out+='</div></section>';
+  });
+  out+='</div>';
+  if(S.err)out+='<p class="msg err">'+S.err+'</p>';
+  if(S.warn){var miss=t.items.length-filled();out+='<div class="warnbox"><p><b>Brakuje '+miss+' '+pl(miss,'odpowiedzi','odpowiedzi','odpowiedzi')+'.</b> Puste pola będą liczone jako błędne.</p><div class="row"><button class="btn" data-a="warn0">Wracam uzupełnić</button><button class="btn primary" data-a="submit2">Sprawdź mimo to</button></div></div>';}
+  else out+='<div class="actions"><button class="btn primary big" data-a="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'<span class="spin"></span> Sprawdzam…':'Sprawdź odpowiedzi')+'</button></div>';
+  return out+'</main>';
+}
+function submitTest(){
+  var t=S.t, arr=t.items.map(function(x,i){return String(S.answers[i]||'');});
+  S.busy=true;S.warn=false;S.err='';render();
+  (t.practice?sCall('practice_submit',{p_practice_id:t.practice_id,p_answers:arr}):sCall('submit_attempt',{p_attempt_id:t.attempt_id,p_answers:arr})).then(function(a){
+    ls('zad-draft-'+t.attempt_id,null);S={v:'result',att:a,fresh:true};render();window.scrollTo(0,0);
+  }).catch(function(e){S.busy=false;S.err=errText(e)+' Twoje odpowiedzi są zapamiętane.';render();});
+}
+function practiceCard(a,teacherView){
+  var pr=a.practice, wrong=[], seen={};
+  a.items.forEach(function(it){if(!it.ok){var k=it.prompt;if(!seen[k]){seen[k]=1;wrong.push(it.type==='vocab'?it.prompt:(it.answers||[])[0]);}}});
+  if(teacherView){
+    if(pr&&pr.finished)return '<section class="card"><div class="row"><h3>Ćwiczenie 2 min po kartkówce</h3><span class="spacer"></span><b>'+pr.score+'/'+pr.total+'</b><button class="btn sm" data-a="tpractice" data-id="'+a.attempt_id+'">Zobacz</button></div></section>';
+    return '';
+  }
+  if(pr&&pr.finished)return '<section class="card"><div class="row"><div class="stack" style="gap:2px;flex:1;min-width:200px"><h3>⏱ Ćwiczenie 2 min – zrobione</h3><p class="meta">Wynik: '+pr.score+'/'+pr.total+'</p></div><button class="btn" data-a="practice" data-id="'+a.attempt_id+'">Zobacz ćwiczenie</button></div></section>';
+  if(!wrong.length)return '';
+  return '<section class="card" style="border:2px solid var(--accent)"><div class="stack" style="gap:6px"><h2>⏱ Ćwiczenie na 2 minuty</h2><p class="meta">AI ułoży krótkie zadania tylko z tego, w czym się pomyliłeś:</p><div class="row" style="gap:6px">'+
+    wrong.slice(0,8).map(function(w){return '<span class="chip bad" style="text-transform:none;letter-spacing:0;font-size:14px">'+esc(w)+'</span>';}).join('')+'</div></div>'+
+    '<div class="row"><button class="btn primary big" data-a="practice" data-id="'+a.attempt_id+'">'+(pr?'Dokończ ćwiczenie →':'Zacznij ćwiczenie →')+'</button></div></section>';
+}
+function vResult(a,teacherView){
+  var isP=a.practice===true, p=pct(a.base_score,a.base_total), g=grade(p);
+  var out=teacherView?'':'<main class="in"><div><button class="btn ghost" data-a="home" style="padding-left:0">← Moje kartkówki</button></div>';
+  out+='<div class="stack">'+(teacherView?'<p class="meta">'+esc(a.student)+(a.class_name?' · '+esc(a.class_name):'')+' · '+fmtDate(a.finished_at)+'</p>':'')+'<h1>'+esc(a.title)+'</h1></div>';
+  var head=teacherView?esc(a.student):p===100?'Bezbłędnie! Świetna robota.':p>=70?'Dobra robota!':p>=40?'Nieźle! Zobacz, co poprawić.':'Warto jeszcze powtórzyć.';
+  if(isP)out+='<section class="score"><div class="big">'+a.base_score+'<small>/'+a.base_total+'</small></div><h2>'+head+'</h2><p class="meta">'+p+'% poprawnych w ćwiczeniu</p></section>';
+  else out+='<section class="score"><div class="big">'+a.base_score+'<small>/'+a.base_total+'</small></div><h2>'+head+'</h2><p class="meta">'+p+'% poprawnych w kartkówce'+(a.extra_total?' · powtórki: '+a.extra_score+'/'+a.extra_total:'')+'</p><div class="grade">Ocena: <b>'+g[0]+'</b> ('+g[1]+')</div></section>'+practiceCard(a,teacherView);
+  out+='<div class="tasks">';
+  var base=a.items.filter(function(x){return !x.extra;}).length;
+  a.items.forEach(function(it,i){
+    if(i===base&&it.extra)out+='<div class="sect"><h2>'+(teacherView?'Powtórki ucznia':'Twoje powtórki')+' <span class="chip warn">'+a.extra_score+'/'+a.extra_total+'</span></h2></div>';
+    var ok=it.ok, val=it.given||'', correct=(it.answers||[])[0]||'';
+    out+='<section class="task '+(ok?'ok':'bad')+'"><div class="num">'+(i+1)+'</div><div class="body"><div class="kind"><span class="verdict">'+(ok?'✓ Dobrze':'✗ Błąd')+'</span></div>';
+    if(it.type==='vocab')out+='<p class="word">'+esc(it.prompt)+'</p>';
+    else{var sp=splitGap(it.prompt);out+='<p class="sentence">'+(sp?esc(sp[0])+'<span class="filled">'+esc(ok?val:correct)+'</span>'+esc(sp[1]):esc(it.prompt))+'</p>';}
+    if(ok)out+='<p>'+(teacherView?'Odpowiedź':'Twoja odpowiedź')+': <b>'+esc(val)+'</b></p>';
+    else{out+='<p>'+(teacherView?'Odpowiedź':'Twoja odpowiedź')+': '+(val.trim()?'<span class="yours">'+esc(val)+'</span>':'<i class="meta">brak odpowiedzi</i>')+'</p><p class="pen">→ '+esc(correct)+'</p>';
+      if(it.type!=='choice'&&it.answers.length>1)out+='<p class="meta">Też poprawnie: '+it.answers.slice(1).map(esc).join(' · ')+'</p>';}
+    if(it.explain)out+='<p class="why">💡 '+esc(it.explain)+'</p>';
+    if(isP&&!teacherView){
+      if(!ok)out+='<p class="rep">↻ Zostaje w powtórkach</p>';
+      else if(it.to_repeat===0)out+='<p class="rep">★ Opanowane! Znika z powtórek.</p>';
+      else if(it.to_repeat>0)out+='<p class="rep">Jeszcze '+it.to_repeat+'× w powtórkach</p>';
+    } else if(!teacherView){
+      if(!ok)out+='<p class="rep">↻ Wróci w powtórkach'+(it.to_repeat>1?' ('+it.to_repeat+'× do poprawnej odpowiedzi)':'')+'</p>';
+      else if(it.extra&&it.to_repeat===0)out+='<p class="rep">★ Opanowane! Znika z powtórek.</p>';
+      else if(it.extra)out+='<p class="rep">Jeszcze '+it.to_repeat+'× w powtórkach</p>';
+    }
+    out+='</div></section>';
+  });
+  out+='</div>';
+  if(!teacherView&&!isP&&a.items.some(function(x){return !x.ok;})&&!(a.practice&&a.practice.finished))out+=practiceCard(a,false);
+  if(!teacherView)out+='<div class="actions"><button class="btn primary big" data-a="home">Gotowe</button></div></main>';
+  return out;
+}
+
+/* ================= TEACHER ================= */
+function vTeacherLogin(){
+  return '<main class="in"><form class="login card" id="tlf"><h1>Panel <span class="mark">nauczyciela</span></h1><p class="meta">Zaloguj się kontem, które utworzyłaś w Supabase.</p>'+
+   '<label class="f">E-mail<input class="inp" id="tl-email" type="email" autocomplete="username" required></label>'+
+   '<label class="f">Hasło<input class="inp" id="tl-pass" type="password" autocomplete="current-password" required></label>'+
+   (S.err?'<p class="msg err">'+S.err+'</p>':'')+
+   '<button class="btn primary big" type="submit"'+(S.busy?' disabled':'')+'>'+(S.busy?'<span class="spin"></span> Loguję…':'Zaloguj się')+'</button>'+
+   '<p class="meta" style="text-align:center"><a href="#" style="color:inherit">← Logowanie ucznia</a></p></form></main>';
+}
+function teacherLogin(){
+  var em=document.getElementById('tl-email').value, pw=document.getElementById('tl-pass').value;
+  S.busy=true;S.err='';render();
+  authToken('password',{email:em,password:pw}).then(function(){return trpc('claim_teacher',{});}).then(function(ok){
+    if(!ok){teacher=null;ls('zad-teacher',null);throw {code:'not_teacher'};}
+    S={v:'teacher',tab:ls('zad-tab')||'results'};render();loadTab();
+  }).catch(function(e){teacher=null;ls('zad-teacher',null);S={v:'tlogin',err:/invalid|credentials|400/i.test(e.code)?ERR.invalid_credentials:errText(e)};render();
+    var el=document.getElementById('tl-email');if(el)el.value=em;});
+}
+var TABS=[['results','Wyniki'],['words','Najtrudniejsze słowa'],['quizzes','Kartkówki'],['students','Uczniowie']];
+function vTeacher(){
+  var out='<main class="in"><nav class="tabs" role="tablist">'+TABS.map(function(t){return '<button role="tab" data-a="tab" data-v="'+t[0]+'" aria-selected="'+(S.tab===t[0])+'">'+t[1]+'</button>';}).join('')+'</nav>';
+  if(S.err)out+='<p class="msg err">'+S.err+'</p>';
+  if(S.loading)out+='<div class="loading"><span class="spin"></span> Ładowanie…</div>';
+  else if(S.tab==='results')out+=tResults();
+  else if(S.tab==='words')out+=tWords();
+  else if(S.tab==='quizzes')out+=S.edit?tEditor():tQuizzes();
+  else if(S.tab==='students')out+=tStudents();
+  return out+'</main>';
+}
+function loadTab(){
+  S.loading=true;S.err='';render();
+  var p;
+  if(S.tab==='results')p=Promise.all([trpc('t_results'),trpc('t_quizzes'),trpc('t_students')]).then(function(r){S.results=r[0];S.quizzes=r[1];S.students=r[2];});
+  else if(S.tab==='words')p=Promise.all([trpc('t_hard_words',{p_class_name:S.wclass||''}),S.students?Promise.resolve(S.students):trpc('t_students')]).then(function(r){S.words=r[0];S.students=r[1];});
+  else if(S.tab==='quizzes')p=Promise.all([trpc('t_quizzes'),trpc('t_students')]).then(function(r){S.quizzes=r[0];S.students=r[1];});
+  else p=trpc('t_students').then(function(r){S.students=r;});
+  p.then(function(){S.loading=false;render();}).catch(function(e){S.loading=false;S.err=errText(e);if(S.v==='teacher')render();});
+}
+function classes(){var m={};(S.students||[]).forEach(function(s){if(s.class_name)m[s.class_name]=1;});return Object.keys(m).sort();}
+function classSelect(id,cur,allLabel){return '<select class="inp" id="'+id+'"><option value="">'+(allLabel||'Wszystkie klasy')+'</option>'+classes().map(function(c){return '<option'+(c===cur?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>';}
+
+/* --- results --- */
+function tResults(){
+  var rs=S.results||[], fq=S.rq||'', fc=S.rc||'';
+  var list=rs.filter(function(r){return (!fq||r.quiz_id===fq)&&(!fc||r.class_name===fc);});
+  var out='<div class="stack"><h1>Wyniki uczniów</h1><p class="lead">Kliknij wiersz, żeby zobaczyć odpowiedzi ucznia. Ocena liczy się z części wspólnej kartkówki, bez osobistych powtórek.</p></div>';
+  out+='<div class="filters"><label class="f">Kartkówka<select class="inp" id="f-rq"><option value="">Wszystkie</option>'+(S.quizzes||[]).map(function(q){return '<option value="'+q.id+'"'+(q.id===fq?' selected':'')+'>'+esc(q.title)+'</option>';}).join('')+'</select></label><label class="f">Klasa'+classSelect('f-rc',fc)+'</label></div>';
+  if(list.length){
+    var sum=0,ex=0,ext=0;list.forEach(function(r){sum+=pct(r.base_score,r.base_total);ex+=r.extra_score||0;ext+=r.extra_total||0;});
+    var avg=Math.round(sum/list.length);
+    var who={};list.forEach(function(r){who[r.student_id]=1;});
+    var expected=fq?(S.students||[]).filter(function(s){var q=(S.quizzes||[]).filter(function(x){return x.id===fq;})[0];return (!fc||s.class_name===fc)&&(!q||!q.class_name||q.class_name===s.class_name);}).length:0;
+    out+='<div class="stats"><div class="stat"><b>'+list.length+'</b><span>'+pl(list.length,'napisana kartkówka','napisane kartkówki','napisanych kartkówek')+'</span></div><div class="stat"><b>'+avg+'%</b><span>średni wynik</span></div><div class="stat"><b class="gr" style="font-size:38px;color:var(--bad)">'+grade(avg)[0]+'</b><span>średnia ocena</span></div>'+
+      (ext?'<div class="stat"><b>'+pct(ex,ext)+'%</b><span>poprawnych powtórek</span></div>':'')+
+      (fq&&expected?'<div class="stat"><b>'+Object.keys(who).length+'/'+expected+'</b><span>uczniów napisało</span></div>':'')+'</div>';
+  }
+  if(!rs.length)return out+'<div class="empty">Nikt jeszcze nie napisał kartkówki. Dodaj uczniów i kartkówkę w pozostałych zakładkach.</div>';
+  if(!list.length)return out+'<div class="empty">Brak wyników dla tych filtrów.</div>';
+  out+='<div class="tw"><table><thead><tr><th>Uczeń</th><th>Klasa</th><th>Kartkówka</th><th>Wynik</th><th class="n">Ocena</th><th class="n">Powtórki</th><th class="n">Ćwiczenie</th><th>Data</th></tr></thead><tbody>';
+  list.forEach(function(r){var p=pct(r.base_score,r.base_total);
+    out+='<tr class="click" data-a="tattempt" data-id="'+r.attempt_id+'" tabindex="0"><td><b>'+esc(r.full_name)+'</b></td><td>'+esc(r.class_name)+'</td><td>'+esc(r.title)+'</td><td>'+bar(p,r.base_score+'/'+r.base_total)+'</td><td class="n"><span class="gr" style="color:'+color(p)+'">'+grade(p)[0]+'</span></td><td class="n">'+(r.extra_total?r.extra_score+'/'+r.extra_total:'—')+'</td><td class="n">'+(r.practice_total?r.practice_score+'/'+r.practice_total:'<span class="meta">—</span>')+'</td><td class="meta" style="white-space:nowrap">'+fmtDate(r.finished_at)+'</td></tr>';});
+  return out+'</tbody></table></div>';
+}
+function openAttempt(id){
+  S.sheet='<div class="loading"><span class="spin"></span> Ładowanie…</div>';render();
+  trpc('t_attempt',{p_attempt_id:id}).then(function(a){
+    S.sheetAttempt=a;
+    S.sheet='<div class="row"><span class="spacer"></span><button class="btn" data-a="sheetclose">Zamknij ✕</button></div>'+vResult(a,true)+
+     '<div class="card"><p class="meta">Usunięcie wyniku pozwoli uczniowi napisać tę kartkówkę jeszcze raz. Statystyki słówek zostają.</p><div class="row" id="delatt">'+(S.delAtt===id?'<button class="btn danger" data-a="delatt2" data-id="'+id+'">Na pewno usunąć?</button><button class="btn ghost" data-a="delatt0">Anuluj</button>':'<button class="btn danger" data-a="delatt" data-id="'+id+'">Usuń ten wynik</button>')+'</div></div>';
+    render();
+  }).catch(function(e){S.sheet='<p class="msg err">'+errText(e)+'</p><button class="btn" data-a="sheetclose">Zamknij</button>';render();});
+}
+
+/* --- hard words --- */
+function tWords(){
+  var ws=S.words||[];
+  var out='<div class="stack"><h1>Najtrudniejsze <span class="mark">słowa</span></h1><p class="lead">Słówka i zadania, w których uczniowie robią najwięcej błędów. Kliknij wiersz, żeby zobaczyć, kto ma z nim kłopot.</p></div>';
+  out+='<div class="filters"><label class="f">Klasa'+classSelect('f-wc',S.wclass||'')+'</label></div>';
+  if(!ws.length)return out+'<div class="empty">Na razie brak błędów do pokazania. Statystyki pojawią się po pierwszych kartkówkach.</div>';
+  var top=ws.slice(0,3);
+  out+='<div class="stats">'+top.map(function(w,i){return '<div class="stat"><span>'+(i+1)+'. najtrudniejsze</span><b style="font-size:24px">'+esc(w.type==='vocab'?w.prompt:w.answer)+'</b><span>'+w.errors+' '+pl(w.errors,'błąd','błędy','błędów')+' · '+w.err_students+' '+pl(w.err_students,'uczeń','uczniów','uczniów')+'</span></div>';}).join('')+'</div>';
+  out+='<div class="tw"><table><thead><tr><th class="n">#</th><th>Słowo / zadanie</th><th>Poprawna odpowiedź</th><th class="n">Błędy</th><th class="n">Uczniów z błędem</th><th>Skuteczność</th><th class="n">Wciąż do powtórki</th></tr></thead><tbody>';
+  ws.forEach(function(w,i){var eff=pct(w.corrects,w.corrects+w.errors), open=S.wopen===w.key;
+    out+='<tr class="click" data-a="wopen" data-id="'+esc(w.key)+'" tabindex="0"><td class="n meta">'+(i+1)+'</td><td>'+(w.type==='vocab'?'<b>'+esc(w.prompt)+'</b>':esc(w.prompt))+'</td><td><b>'+esc(w.answer)+'</b></td><td class="n"><b>'+w.errors+'</b></td><td class="n">'+w.err_students+' / '+w.seen_students+'</td><td>'+bar(eff)+'</td><td class="n">'+(w.repeat_students?'<span class="chip bad">'+w.repeat_students+' '+pl(w.repeat_students,'uczeń','uczniów','uczniów')+'</span>':'<span class="chip ok">nikt</span>')+'</td></tr>';
+    if(open)out+='<tr><td></td><td colspan="6"><div class="row" style="gap:6px">'+(w.students||[]).map(function(s){return '<span class="chip '+(s.to_repeat?'bad':'mute')+'" style="text-transform:none;letter-spacing:0;font-size:13px">'+esc(s.name)+(s.class_name?' ('+esc(s.class_name)+')':'')+' · '+s.errors+'×'+(s.to_repeat?'':' ✓')+'</span>';}).join('')+'</div><p class="meta" style="margin-top:6px">Czerwone: słówko wciąż w powtórkach. Szare z ✓: już opanowane.</p></td></tr>';
+  });
+  return out+'</tbody></table></div>';
+}
+
+/* --- quizzes --- */
+function tQuizzes(){
+  var qs=S.quizzes||[];
+  var out='<div class="row"><div class="stack" style="flex:1;min-width:240px"><h1>Kartkówki</h1><p class="lead">Kartkówka jest wspólna dla klasy. Każdy uczeń dostaje do niej dodatkowo swoje słówka do powtórki.</p></div><button class="btn primary big" data-a="newquiz">＋ Nowa kartkówka</button></div>';
+  if(S.flash)out+='<p class="msg ok">'+esc(S.flash)+'</p>';
+  if(!qs.length)return out+'<div class="empty">Nie ma jeszcze kartkówek. Kliknij „Nowa kartkówka”.</div>';
+  out+='<div class="cards">';
+  qs.forEach(function(q){
+    out+='<article class="card"><div class="qcard"><div class="stack" style="gap:4px"><div class="row" style="gap:6px">'+(q.is_open?'<span class="chip ok">Otwarta</span>':'<span class="chip mute">Zamknięta</span>')+'<span class="chip">'+esc(q.class_name||'Wszystkie klasy')+'</span>'+(q.allow_retake?'<span class="chip mute">Można poprawiać</span>':'')+'</div><h3>'+esc(q.title)+'</h3><p class="meta">'+q.item_count+' '+pl(q.item_count,'zadanie','zadania','zadań')+' + '+q.extra_count+' powtórek · napisało: '+q.done+(q.avg_pct!=null?' · średnio '+q.avg_pct+'%':'')+'</p></div>'+
+      '<div class="row" style="gap:4px"><button class="btn sm" data-a="toggleopen" data-id="'+q.id+'">'+(q.is_open?'Zamknij':'Otwórz')+'</button><button class="btn sm" data-a="editquiz" data-id="'+q.id+'">Edytuj</button><button class="btn sm" data-a="qres" data-id="'+q.id+'">Wyniki</button>'+
+      (S.delQ===q.id?'<button class="btn sm danger" data-a="delq2" data-id="'+q.id+'">Usunąć z wynikami?</button><button class="btn sm ghost" data-a="delq0">Anuluj</button>':'<button class="btn sm ghost danger" data-a="delq" data-id="'+q.id+'">Usuń</button>')+'</div></div></article>';
+  });
+  return out+'</div>';
+}
+function toLine(it){var s;if(it.type==='choice')s=it.prompt+' = '+it.answers[0]+' ['+(it.options||[]).join(' | ')+']';else s=it.prompt+' = '+it.answers.join(' / ');if(it.explain)s+=' # '+it.explain;return s;}
+function parseLines(text,enFirst){
+  var items=[],errors=[];
+  String(text||'').split(/\r?\n/).forEach(function(raw,idx){
+    var line=raw.trim();if(!line||line.indexOf('//')===0)return;
+    line=line.replace(/^\d+[.)]\s+/,'').replace(/^[-•*]\s+/,'');
+    var explain='',hi=line.indexOf(' #');if(hi<0&&line.indexOf('#')>0)hi=line.indexOf('#')-1;
+    if(hi>=0){explain=line.slice(hi+2).trim();line=line.slice(0,hi).trim();}
+    var left,right,m,i;
+    if((i=line.indexOf('='))>=0){left=line.slice(0,i);right=line.slice(i+1);}
+    else if((i=line.indexOf('\t'))>=0){left=line.slice(0,i);right=line.slice(i+1);}
+    else if((m=/\s[-–—]\s/.exec(line))){left=line.slice(0,m.index);right=line.slice(m.index+m[0].length);}
+    else{errors.push({n:idx+1,raw:raw,msg:'brak znaku = między pytaniem a odpowiedzią'});return;}
+    left=left.trim();right=right.trim();
+    var options=null,om=/\[([^\]]*)\]\s*$/.exec(right);
+    if(om){options=om[1].split(om[1].indexOf('|')>=0?'|':',').map(function(s){return s.trim();}).filter(Boolean);right=right.slice(0,om.index).trim();}
+    var type=options?'choice':/_{2,}/.test(left)?'gap':'vocab', prompt=left, answers;
+    if(type==='vocab'&&enFirst){prompt=right;answers=left.split('/');}else answers=right.split('/');
+    answers=answers.map(function(s){return s.trim();}).filter(Boolean);
+    if(!prompt){errors.push({n:idx+1,raw:raw,msg:'brak pytania'});return;}
+    if(!answers.length){errors.push({n:idx+1,raw:raw,msg:'brak poprawnej odpowiedzi'});return;}
+    if(type==='choice'){if(options.length<2){errors.push({n:idx+1,raw:raw,msg:'podaj co najmniej 2 opcje'});return;}
+      if(options.indexOf(answers[0])<0){errors.push({n:idx+1,raw:raw,msg:'poprawnej odpowiedzi „'+answers[0]+'” nie ma wśród opcji'});return;}
+      answers=[answers[0]];}
+    var it={type:type,prompt:prompt,answers:answers};if(options)it.options=options;if(explain)it.explain=explain;
+    items.push(it);
+  });
+  return {items:items,errors:errors};
+}
+function aiPrompt(g){
+  var n=Math.max(1,Math.min(40,parseInt(g.count,10)||10));
+  var types={mixed:'mieszane: słówka, zdania z luką i zadania wyboru',vocab:'tylko słówka (polskie słowo → angielskie)',gap:'tylko zdania z luką',choice:'tylko zadania wyboru'}[g.type];
+  return 'Jesteś nauczycielem angielskiego w polskiej szkole (uczniowie 13–16 lat). Przygotuj '+n+' zadań na kartkówkę.\n'+
+   'Temat: '+(g.topic||'powtórka ogólna')+'\nPoziom: '+g.level+'\nRodzaj zadań: '+types+'\n'+(g.notes?'Uwagi: '+g.notes+'\n':'')+
+   '\nZwróć WYŁĄCZNIE linie w poniższym formacie, jedno zadanie w linii, bez numeracji, nagłówków i komentarzy.\n'+
+   '1) Słówko: polskie słowo = angielskie tłumaczenie (kilka poprawnych wersji oddziel znakiem /)\n   pies = dog\n   iść pieszo = walk / go on foot\n'+
+   '2) Zdanie z luką: angielskie zdanie z ___ i formą podstawową w nawiasie = poprawna odpowiedź / inne poprawne wersje # krótkie wyjaśnienie po polsku\n   She ___ (not / like) fish. = doesn\'t like / does not like # przeczenie w 3. os. l.p.\n'+
+   '3) Wybór: angielskie zdanie z ___ = poprawna odpowiedź [opcja | opcja | opcja]\n   Look! It ___ outside. = is snowing [snows | is snowing | snow]\n'+
+   '\nKażde zadanie musi mieć jednoznaczną odpowiedź. Przy formach skróconych podaj obie wersje (np. don\'t / do not).';
+}
+function newEditor(q){
+  return {id:q?q.id:null,title:q?q.title:'',class_name:q?q.class_name:'',extra_count:q?q.extra_count:5,is_open:q?q.is_open:true,allow_retake:q?q.allow_retake:false,
+    text:q?q.items.map(toLine).join('\n'):'',enFirst:false,ai:{topic:'',level:'A2+ (klasa 8)',count:10,type:'mixed',notes:''},showAi:!q};
+}
+function tEditor(){
+  var e=S.edit, p=parseLines(e.text,e.enFirst);
+  var out='<div><button class="btn ghost" data-a="cancelquiz" style="padding-left:0">← Wróć bez zapisywania</button></div><h1>'+(e.id?'Edytuj kartkówkę':'Nowa <span class="mark">kartkówka</span>')+'</h1>';
+  out+='<section class="card"><div class="grid2"><label class="f" style="grid-column:1/-1">Tytuł (widzą go uczniowie)<input class="inp" id="e-title" data-e="title" value="'+esc(e.title)+'" placeholder="np. Unit 3 – jedzenie i Present Simple"></label>'+
+   '<label class="f">Dla klasy<input class="inp" id="e-class" data-e="class_name" list="dl-classes" value="'+esc(e.class_name)+'" placeholder="puste = wszystkie klasy"><datalist id="dl-classes">'+classes().map(function(c){return '<option value="'+esc(c)+'">';}).join('')+'</datalist></label>'+
+   '<label class="f">Powtórek na ucznia<input class="inp" type="number" min="0" max="20" id="e-extra" data-e="extra_count" value="'+esc(e.extra_count)+'"><span class="meta" style="font-weight:400">Ile słówek z jego wcześniejszych błędów dodać</span></label></div>'+
+   '<div class="row"><label class="check"><input type="checkbox" id="e-open" data-e="is_open"'+(e.is_open?' checked':'')+'> Otwarta – uczniowie widzą ją od razu</label><label class="check"><input type="checkbox" id="e-retake" data-e="allow_retake"'+(e.allow_retake?' checked':'')+'> Można pisać kilka razy</label></div></section>';
+  out+='<section class="card"><div class="row"><h2>Przygotuj zadania z AI</h2><span class="spacer"></span><button class="btn sm ghost" data-a="toggleai">'+(e.showAi?'Ukryj':'Pokaż')+'</button></div>';
+  if(e.showAi){
+    out+='<p class="meta">Wpisz temat i kliknij „Wygeneruj”. Zadania trafią do pola „Twoje zadania”, gdzie możesz je poprawić przed zapisaniem.</p><div class="grid2"><label class="f" style="grid-column:1/-1">Temat<input class="inp" id="ai-topic" data-ai="topic" value="'+esc(e.ai.topic)+'" placeholder="np. słownictwo: jedzenie; Past Simple – czasowniki nieregularne"></label>'+
+     '<label class="f">Poziom<select class="inp" id="ai-level" data-ai="level">'+['A1 (klasy 4–5)','A2 (klasy 6–7)','A2+ (klasa 8)','B1 (egzamin ósmoklasisty / 1 LO)','B1+ (1–2 LO)','B2 (2–3 LO)'].map(function(l){return '<option'+(l===e.ai.level?' selected':'')+'>'+l+'</option>';}).join('')+'</select></label>'+
+     '<label class="f">Liczba zadań<input class="inp" type="number" min="1" max="40" id="ai-count" data-ai="count" value="'+esc(e.ai.count)+'"></label>'+
+     '<label class="f">Rodzaj<select class="inp" id="ai-type" data-ai="type">'+[['mixed','Mieszane'],['vocab','Słówka'],['gap','Zdania z luką'],['choice','Wybór odpowiedzi']].map(function(o){return '<option value="'+o[0]+'"'+(o[0]===e.ai.type?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></label>'+
+     '<label class="f" style="grid-column:1/-1">Uwagi (opcjonalnie)<input class="inp" id="ai-notes" data-ai="notes" value="'+esc(e.ai.notes)+'" placeholder="np. słówka z rozdziału 4, bez phrasal verbs"></label></div>'+
+     '<div class="row"><button class="btn primary" data-a="aigen"'+(S.aiBusy?' disabled':'')+'>'+(S.aiBusy?'<span class="spin"></span> AI układa zadania…':'✨ Wygeneruj zadania')+'</button></div>'+
+     (S.aiErr?'<p class="msg err">'+S.aiErr+'</p>':'')+(S.aiOk?'<p class="msg ok">'+esc(S.aiOk)+'</p>':'')+
+     '<details><summary class="meta" style="cursor:pointer">Bez API: skopiuj polecenie do Claude albo ChatGPT</summary><div class="stack" style="margin-top:8px"><div class="code" id="ai-out">'+esc(aiPrompt(e.ai))+'</div><div class="row"><button class="btn" data-a="copyai">Kopiuj polecenie</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Otwórz Claude ↗</a></div></div></details>';
+  }
+  out+='</section>';
+  out+='<section class="cols"><div class="card"><h2>Zadania</h2><p class="meta">Jedno zadanie w linii. Możesz wkleić listę słówek z Worda albo Excela.</p>'+
+   '<div class="code" style="max-height:none">pies = dog\nwyjątkowy = exceptional / unique\nShe ___ (go) to school by bus. = goes # 3. os. l.p. dostaje -s\nLook! It ___ . = is snowing [snows | is snowing | snow]</div>'+
+   '<label class="f">Twoje zadania<textarea class="inp" id="e-text" data-e="text" rows="14" spellcheck="false" placeholder="pies = dog">'+esc(e.text)+'</textarea></label>'+
+   '<label class="check"><input type="checkbox" id="e-enfirst" data-e="enFirst"'+(e.enFirst?' checked':'')+'> W mojej liście słówek najpierw jest angielskie słowo (dog = pies)</label></div>'+
+   '<div class="card"><div class="row"><h2>Podgląd</h2><span class="spacer"></span><span class="chip" id="pv-count">'+p.items.length+'</span></div><div id="pv">'+previewHtml(p)+'</div></div></section>';
+  if(S.saveErr)out+='<p class="msg err">'+esc(S.saveErr)+'</p>';
+  out+='<div class="actions"><button class="btn" data-a="cancelquiz">Anuluj</button><button class="btn primary big" data-a="savequiz"'+(S.saving?' disabled':'')+'>'+(S.saving?'<span class="spin"></span> Zapisuję…':'Zapisz kartkówkę')+'</button></div>';
+  return out;
+}
+function previewHtml(p){
+  if(!p.items.length&&!p.errors.length)return '<p class="meta">Tu zobaczysz, jak aplikacja odczytała zadania.</p>';
+  var o='<div class="preview">';
+  p.errors.forEach(function(er){o+='<div class="pv err"><span>!</span><span>Linia '+er.n+'</span><span>'+esc(er.raw)+' – <b>'+esc(er.msg)+'</b></span></div>';});
+  p.items.forEach(function(it,i){o+='<div class="pv"><span class="meta">'+(i+1)+'.</span><span class="chip mute" style="justify-self:start">'+({vocab:'słówko',gap:'luka',choice:'wybór'})[it.type]+'</span><span>'+esc(it.prompt)+' → <span class="ans">'+esc(it.answers.join(' / '))+'</span>'+(it.options?' <span class="meta">['+esc(it.options.join(' | '))+']</span>':'')+(it.explain?' <span class="meta">💡 '+esc(it.explain)+'</span>':'')+'</span></div>';});
+  return o+'</div>';
+}
+function refreshPreview(){var p=parseLines(S.edit.text,S.edit.enFirst),el=document.getElementById('pv'),c=document.getElementById('pv-count');if(el)el.innerHTML=previewHtml(p);if(c)c.textContent=p.items.length;}
+function generateQuizAI(){
+  var e=S.edit;
+  if(!e.ai.topic.trim()){S.aiErr='Wpisz temat, żeby AI wiedziało, o czym ułożyć zadania.';S.aiOk='';render();return;}
+  S.aiBusy=true;S.aiErr='';S.aiOk='';render();
+  aiCall({action:'quiz',topic:e.ai.topic,level:e.ai.level,count:e.ai.count,type:e.ai.type,notes:e.ai.notes},true).then(function(r){
+    var lines=String(r&&r.lines||'').trim();
+    if(!lines)throw {code:'ai_bad_output'};
+    e.text=e.text.trim()?e.text.replace(/\s+$/,'')+'\n'+lines:lines;
+    e.enFirst=false;
+    if(!e.title.trim())e.title=e.ai.topic;
+    var n=parseLines(lines,false).items.length;
+    S.aiBusy=false;S.aiOk='Dodano '+n+' '+pl(n,'zadanie','zadania','zadań')+'. Sprawdź je w podglądzie.';render();
+    var ta=document.getElementById('e-text');if(ta)ta.scrollIntoView({block:'center'});
+  }).catch(function(er){S.aiBusy=false;S.aiErr=errText(er);render();});
+}
+function saveQuiz(){
+  var e=S.edit,p=parseLines(e.text,e.enFirst);
+  if(!e.title.trim()){S.saveErr='Dodaj tytuł kartkówki.';render();return;}
+  if(p.errors.length){S.saveErr='Popraw linie zaznaczone na czerwono w podglądzie ('+p.errors.length+').';render();return;}
+  if(!p.items.length){S.saveErr='Dodaj co najmniej jedno zadanie.';render();return;}
+  S.saving=true;S.saveErr='';render();
+  trpc('t_save_quiz',{p_id:e.id,p_title:e.title,p_class_name:e.class_name,p_items:p.items,p_extra_count:parseInt(e.extra_count,10)||0,p_is_open:e.is_open,p_allow_retake:e.allow_retake}).then(function(){
+    S.saving=false;S.edit=null;S.flash='Zapisano kartkówkę „'+e.title+'”.';loadTab();
+  }).catch(function(er){S.saving=false;S.saveErr=errText(er);render();});
+}
+
+/* --- students --- */
+function tStudents(){
+  var st=S.students||[], fc=S.sc||'';
+  var list=st.filter(function(s){return !fc||s.class_name===fc;});
+  var out='<div class="stack"><h1>Uczniowie</h1><p class="lead">Każdy uczeń loguje się swoim loginem i 4-cyfrowym PIN-em. PIN widać tylko raz, przy tworzeniu konta lub resecie, więc od razu go zapisz albo wydrukuj kartki.</p></div>';
+  out+='<section class="card"><h2>Dodaj uczniów</h2><div class="grid2"><label class="f">Klasa<input class="inp" id="ns-class" list="dl-cls2" placeholder="np. 8a" value="'+esc(S.nsClass||'')+'"><datalist id="dl-cls2">'+classes().map(function(c){return '<option value="'+esc(c)+'">';}).join('')+'</datalist></label></div>'+
+   '<label class="f">Imiona i nazwiska – jedna osoba w linii<textarea class="inp" id="ns-names" rows="5" placeholder="Jan Kowalski&#10;Zofia Nowak">'+esc(S.nsNames||'')+'</textarea></label>'+
+   '<div class="row"><button class="btn primary" data-a="addstudents"'+(S.adding?' disabled':'')+'>'+(S.adding?'<span class="spin"></span> Tworzę konta…':'Utwórz konta')+'</button></div></section>';
+  if(S.newAcc&&S.newAcc.length){
+    out+='<section class="card printable"><div class="row no-print"><h2>Nowe konta – zapisz PIN-y</h2><span class="spacer"></span><button class="btn sm" data-a="copyacc">Kopiuj listę</button><button class="btn sm" data-a="printacc">Drukuj kartki</button><button class="btn sm ghost" data-a="closeacc">Zamknij</button></div>'+
+     '<p class="meta no-print">Po zamknięciu tej listy PIN-ów nie da się już odczytać, można je tylko zresetować.</p><div class="slips">'+
+     S.newAcc.map(function(a){return '<div class="slip"><div><b style="font-family:var(--f-display)">'+esc(a.full_name)+'</b>'+(a.class_name?' · '+esc(a.class_name):'')+'</div><div class="meta">'+esc(location.origin+location.pathname)+'</div><div>Login: <b>'+esc(a.login)+'</b></div><div>PIN: <b>'+esc(a.pin)+'</b></div></div>';}).join('')+'</div></section>';
+  }
+  out+='<div class="filters"><label class="f">Klasa'+classSelect('f-sc',fc)+'</label><p class="meta" style="padding-bottom:10px">'+list.length+' '+pl(list.length,'uczeń','uczniów','uczniów')+'</p></div>';
+  if(!st.length)return out+'<div class="empty">Nie ma jeszcze uczniów. Dodaj ich powyżej.</div>';
+  out+='<div class="tw"><table><thead><tr><th>Imię i nazwisko</th><th>Klasa</th><th>Login</th><th class="n">Kartkówki</th><th>Średnia</th><th class="n">Do powtórki</th><th></th></tr></thead><tbody>';
+  list.forEach(function(s){
+    var ed=S.editSt===s.id;
+    out+='<tr><td>'+(ed?'<input class="inp" id="es-name" value="'+esc(s.full_name)+'">':'<b>'+esc(s.full_name)+'</b>'+(s.locked?' <span class="chip bad">zablokowany</span>':''))+'</td><td>'+(ed?'<input class="inp" id="es-class" style="width:6em" value="'+esc(s.class_name)+'">':esc(s.class_name))+'</td><td><code>'+esc(s.login)+'</code></td><td class="n">'+s.done+'</td><td>'+(s.avg_pct!=null?bar(s.avg_pct):'<span class="meta">—</span>')+'</td><td class="n">'+(s.to_repeat?'<span class="chip warn">'+s.to_repeat+'</span>':'0')+'</td><td style="white-space:nowrap">';
+    if(ed)out+='<button class="btn sm primary" data-a="savest" data-id="'+s.id+'">Zapisz</button> <button class="btn sm ghost" data-a="editst0">Anuluj</button>';
+    else if(S.pinFor&&S.pinFor.id===s.id)out+='Nowy PIN: <b style="font-size:18px;letter-spacing:.1em">'+esc(S.pinFor.pin)+'</b> <button class="btn sm ghost" data-a="pin0">OK</button>';
+    else if(S.delSt===s.id)out+='<button class="btn sm danger" data-a="delst2" data-id="'+s.id+'">Usunąć z wynikami?</button> <button class="btn sm ghost" data-a="delst0">Anuluj</button>';
+    else out+='<button class="btn sm" data-a="stdetail" data-id="'+s.id+'">Słówka</button> <button class="btn sm" data-a="resetpin" data-id="'+s.id+'">Nowy PIN</button> <button class="btn sm ghost" data-a="editst" data-id="'+s.id+'">Edytuj</button> <button class="btn sm ghost danger" data-a="delst" data-id="'+s.id+'">Usuń</button>';
+    out+='</td></tr>';
+  });
+  return out+'</tbody></table></div>';
+}
+function openStudentDetail(id){
+  var s=(S.students||[]).filter(function(x){return x.id===id;})[0]||{};
+  S.sheet='<div class="loading"><span class="spin"></span> Ładowanie…</div>';render();
+  Promise.all([trpc('t_student_detail',{p_student_id:id}),S.results?Promise.resolve(S.results):trpc('t_results')]).then(function(r){
+    S.results=r[1];
+    var d=r[0], att=r[1].filter(function(a){return a.student_id===id;});
+    var o='<div class="row"><div class="stack" style="flex:1;gap:2px"><p class="meta">'+esc(s.class_name||'')+' · '+esc(s.login||'')+'</p><h1>'+esc(s.full_name||'')+'</h1></div><button class="btn" data-a="sheetclose">Zamknij ✕</button></div>';
+    o+='<section class="card"><h2>Kartkówki</h2>'+(att.length?'<div class="hist">'+att.map(function(a){var p=pct(a.base_score,a.base_total);return '<button class="hrow" data-a="tattempt" data-id="'+a.attempt_id+'"><span class="t">'+esc(a.title)+'<br><span class="meta" style="font-weight:400">'+fmtDate(a.finished_at)+'</span></span><span class="gr" style="color:'+color(p)+'">'+grade(p)[0]+'</span>'+bar(p,a.base_score+'/'+a.base_total)+'</button>';}).join('')+'</div>':'<p class="meta">Jeszcze nic nie napisał(a).</p>')+'</section>';
+    o+='<section class="card"><h2>Słówka z błędami</h2>'+(d.review.length?'<div class="review">'+d.review.map(function(w){return '<div class="rv"><div class="p">'+esc(w.prompt)+' → <span class="a">'+esc(w.answer)+'</span><br><span class="meta">błędy: '+w.errors+' · poprawnie: '+w.corrects+'</span></div>'+(w.to_repeat?'<span class="times">'+w.to_repeat+'×</span>':'<span class="chip ok">opanowane</span>')+'</div>';}).join('')+'</div>':'<p class="meta">Brak błędów.</p>')+'</section>';
+    S.sheet=o;render();
+  }).catch(function(e){S.sheet='<p class="msg err">'+errText(e)+'</p><button class="btn" data-a="sheetclose">Zamknij</button>';render();});
+}
+
+/* ---------------- events ---------------- */
+app.addEventListener('submit',function(ev){ev.preventDefault();if(ev.target.id==='slf')studentLogin();else if(ev.target.id==='tlf')teacherLogin();});
+app.addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-a]');if(!b||b.disabled)return;
+  var a=b.getAttribute('data-a'), id=b.getAttribute('data-id');
+  if(a==='sheetbg'){if(ev.target===b){S.sheet=null;S.delAtt=null;render();}return;}
+  switch(a){
+    case 'brand':if(isTeacherRoute()){S.edit=null;S.sheet=null;render();}else if(ls('zad-student'))goHome();break;
+    case 'home':goHome();break;
+    case 'slogout':var t=sTok();ls('zad-student',null);if(t)rpc('student_logout',{p_token:t}).catch(function(){});S={v:'slogin'};render();break;
+    case 'tlogout':try{fetch(URL_+'/auth/v1/logout',{method:'POST',headers:headers(true)}).catch(function(){});}catch(e){}teacher=null;ls('zad-teacher',null);S={v:'tlogin'};render();break;
+    case 'start':startQuiz(id);break;
+    case 'practice':startPractice(id);break;
+    case 'tpractice':S.sheet='<div class="loading"><span class="spin"></span> Ładowanie…</div>';render();
+      trpc('t_practice',{p_attempt_id:id}).then(function(p){S.sheet='<div class="row"><button class="btn ghost" data-a="tattempt" data-id="'+id+'" style="padding-left:0">← Kartkówka</button><span class="spacer"></span><button class="btn" data-a="sheetclose">Zamknij ✕</button></div>'+vResult(p,true);render();}).catch(function(e){S.sheet='<p class="msg err">'+errText(e)+'</p><button class="btn" data-a="sheetclose">Zamknij</button>';render();});break;
+    case 'aigen':generateQuizAI();break;
+    case 'sattempt':S={v:'loading'};render();sCall('student_attempt',{p_attempt_id:id}).then(function(r){S={v:'result',att:r};render();window.scrollTo(0,0);}).catch(function(){goHome();});break;
+    case 'pick':var i=+b.getAttribute('data-i');S.answers[i]=b.getAttribute('data-v');ls('zad-draft-'+S.t.attempt_id,S.answers);b.parentNode.querySelectorAll('.opt').forEach(function(o){o.setAttribute('aria-pressed',String(o===b));});updateProgress();break;
+    case 'submit':if(filled()<S.t.items.length){S.warn=true;render();var w=app.querySelector(".warnbox");if(w)w.scrollIntoView({block:'center'});}else submitTest();break;
+    case 'submit2':submitTest();break;
+    case 'warn0':S.warn=false;render();break;
+    case 'tab':S.tab=b.getAttribute('data-v');ls('zad-tab',S.tab);S.edit=null;S.flash='';loadTab();break;
+    case 'tattempt':openAttempt(id);break;
+    case 'sheetclose':S.sheet=null;S.delAtt=null;render();break;
+    case 'delatt':S.delAtt=id;openAttempt(id);break;
+    case 'delatt0':S.delAtt=null;openAttempt(S.sheetAttempt.attempt_id);break;
+    case 'delatt2':trpc('t_delete_attempt',{p_attempt_id:id}).then(function(){S.sheet=null;S.delAtt=null;loadTab();}).catch(function(e){S.err=errText(e);S.sheet=null;render();});break;
+    case 'wopen':S.wopen=S.wopen===id?null:id;render();break;
+    case 'newquiz':S.edit=newEditor(null);S.saveErr='';render();window.scrollTo(0,0);break;
+    case 'editquiz':S.edit=newEditor((S.quizzes||[]).filter(function(q){return q.id===id;})[0]);S.saveErr='';render();window.scrollTo(0,0);break;
+    case 'cancelquiz':S.edit=null;render();break;
+    case 'toggleai':S.edit.showAi=!S.edit.showAi;render();break;
+    case 'copyai':copyText(aiPrompt(S.edit.ai),b);break;
+    case 'savequiz':saveQuiz();break;
+    case 'toggleopen':var q=(S.quizzes||[]).filter(function(x){return x.id===id;})[0];trpc('t_set_quiz_open',{p_id:id,p_is_open:!q.is_open}).then(loadTab).catch(function(e){S.err=errText(e);render();});break;
+    case 'qres':S.tab='results';S.rq=id;ls('zad-tab','results');loadTab();break;
+    case 'delq':S.delQ=id;render();break;
+    case 'delq0':S.delQ=null;render();break;
+    case 'delq2':S.delQ=null;trpc('t_delete_quiz',{p_id:id}).then(loadTab).catch(function(e){S.err=errText(e);render();});break;
+    case 'addstudents':
+      var cls=document.getElementById('ns-class').value.trim(), names=document.getElementById('ns-names').value.split(/\r?\n/).map(function(s){return s.replace(/\s+/g,' ').trim();}).filter(Boolean);
+      S.nsClass=cls;S.nsNames=document.getElementById('ns-names').value;
+      if(!names.length){S.err='Wpisz co najmniej jedno imię i nazwisko.';render();break;}
+      S.adding=true;S.err='';render();
+      trpc('t_create_students',{p_rows:names.map(function(n){return {full_name:n,class_name:cls};})}).then(function(r){S.adding=false;S.newAcc=(S.newAcc||[]).concat(r);S.nsNames='';return trpc('t_students');}).then(function(r){S.students=r;render();}).catch(function(e){S.adding=false;S.err=errText(e);render();});
+      break;
+    case 'copyacc':copyText(S.newAcc.map(function(x){return x.full_name+(x.class_name?' ('+x.class_name+')':'')+'\tlogin: '+x.login+'\tPIN: '+x.pin;}).join('\n')+'\n\nStrona: '+location.origin+location.pathname,b);break;
+    case 'printacc':window.print();break;
+    case 'closeacc':S.newAcc=null;render();break;
+    case 'resetpin':trpc('t_reset_pin',{p_student_id:id}).then(function(r){S.pinFor={id:id,pin:r.pin};return trpc('t_students');}).then(function(r){S.students=r;render();}).catch(function(e){S.err=errText(e);render();});break;
+    case 'pin0':S.pinFor=null;render();break;
+    case 'editst':S.editSt=id;render();break;
+    case 'editst0':S.editSt=null;render();break;
+    case 'savest':trpc('t_update_student',{p_student_id:id,p_full_name:document.getElementById('es-name').value,p_class_name:document.getElementById('es-class').value}).then(function(){S.editSt=null;return trpc('t_students');}).then(function(r){S.students=r;render();}).catch(function(e){S.err=errText(e);render();});break;
+    case 'delst':S.delSt=id;render();break;
+    case 'delst0':S.delSt=null;render();break;
+    case 'delst2':S.delSt=null;trpc('t_delete_student',{p_student_id:id}).then(loadTab).catch(function(e){S.err=errText(e);render();});break;
+    case 'stdetail':openStudentDetail(id);break;
+  }
+});
+document.addEventListener('keydown',function(ev){
+  if(ev.key==='Escape'&&S.sheet){S.sheet=null;S.delAtt=null;render();return;}
+  var t=ev.target;
+  if(ev.key==='Enter'&&t.matches&&t.matches('tr.click')){t.click();return;}
+  if(S.v==='test'&&ev.key==='Enter'&&t.hasAttribute('data-i')&&t.tagName==='INPUT'){ev.preventDefault();var n=document.getElementById('a-'+(+t.getAttribute('data-i')+1));if(n)n.focus();else t.blur();}
+});
+app.addEventListener('input',function(ev){
+  var t=ev.target;
+  if(S.v==='test'&&t.hasAttribute('data-i')){S.answers[+t.getAttribute('data-i')]=t.value;ls('zad-draft-'+S.t.attempt_id,S.answers);updateProgress();return;}
+  if(S.edit){
+    if(t.dataset.e){var k=t.dataset.e;S.edit[k]=t.type==='checkbox'?t.checked:t.value;if(k==='text'||k==='enFirst')refreshPreview();return;}
+    if(t.dataset.ai){S.edit.ai[t.dataset.ai]=t.value;var o=document.getElementById('ai-out');if(o)o.textContent=aiPrompt(S.edit.ai);return;}
+  }
+});
+app.addEventListener('change',function(ev){
+  var t=ev.target;
+  if(S.edit&&t.dataset.e&&t.type==='checkbox'){S.edit[t.dataset.e]=t.checked;if(t.dataset.e==='enFirst')refreshPreview();return;}
+  if(t.id==='f-rq'){S.rq=t.value;render();}
+  else if(t.id==='f-rc'){S.rc=t.value;render();}
+  else if(t.id==='f-sc'){S.sc=t.value;render();}
+  else if(t.id==='f-wc'){S.wclass=t.value;S.wopen=null;loadTab();}
+});
+
+boot();
+})();
+</script>
+</body>
+</html>
